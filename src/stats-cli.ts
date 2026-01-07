@@ -1,5 +1,5 @@
 import { parseArgs } from 'node:util';
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import {
   getOverallStats,
   formatPriceChange,
@@ -13,6 +13,7 @@ import {
   searchProducts,
 } from './storage/queries';
 import { getDatabase } from './storage/database';
+import { exportData, formatCsv, formatJson } from './export';
 import type { ProductRecord } from './storage/types';
 
 const DEFAULT_DB = './data/prices.db';
@@ -21,6 +22,10 @@ interface CliOptions {
   db: string;
   command: string;
   args: string[];
+  format: 'csv' | 'json';
+  since?: string;
+  category?: string;
+  output?: string;
 }
 
 function parseCliArgs(args: string[]): CliOptions {
@@ -37,6 +42,23 @@ function parseCliArgs(args: string[]): CliOptions {
         short: 'h',
         default: false,
       },
+      format: {
+        type: 'string',
+        short: 'f',
+        default: 'csv',
+      },
+      since: {
+        type: 'string',
+        short: 's',
+      },
+      category: {
+        type: 'string',
+        short: 'c',
+      },
+      output: {
+        type: 'string',
+        short: 'o',
+      },
     },
     allowPositionals: true,
   });
@@ -50,6 +72,10 @@ function parseCliArgs(args: string[]): CliOptions {
     db: values.db as string,
     command: positionals[0] || 'summary',
     args: positionals.slice(1),
+    format: (values.format as 'csv' | 'json') || 'csv',
+    since: values.since as string | undefined,
+    category: values.category as string | undefined,
+    output: values.output as string | undefined,
   };
 }
 
@@ -58,8 +84,12 @@ function printUsage(): void {
 Usage: npx tsx src/stats-cli.ts [options] <command> [args]
 
 Options:
-  --db, -d      Database path (default: ./data/prices.db)
-  --help, -h    Show this help message
+  --db, -d        Database path (default: ./data/prices.db)
+  --help, -h      Show this help message
+  --format, -f    Export format: csv or json (default: csv)
+  --since, -s     Filter by date (e.g., 7d, 30d, 24h)
+  --category, -c  Filter by category
+  --output, -o    Output file (default: stdout)
 
 Commands:
   summary                 Show overall database statistics (default)
@@ -68,6 +98,7 @@ Commands:
   category <name>         List products in a category
   history <product_id>    Show price history for a product
   changes <product_id>    Show price changes for a product
+  export                  Export data to CSV or JSON
 
 Examples:
   npx tsx src/stats-cli.ts summary
@@ -75,6 +106,8 @@ Examples:
   npx tsx src/stats-cli.ts search "milk"
   npx tsx src/stats-cli.ts category "Pantry"
   npx tsx src/stats-cli.ts history "product-123"
+  npx tsx src/stats-cli.ts export --format csv --since 7d
+  npx tsx src/stats-cli.ts export --format json --category "Pantry" -o export.json
 `);
 }
 
@@ -190,6 +223,23 @@ function showChanges(dbPath: string, productId: string): void {
   });
 }
 
+function runExport(options: CliOptions): void {
+  const records = exportData(options.db, {
+    category: options.category,
+    since: options.since,
+  });
+
+  const formatted =
+    options.format === 'json' ? formatJson(records) : formatCsv(records);
+
+  if (options.output) {
+    writeFileSync(options.output, formatted);
+    console.error(`Exported ${records.length} records to ${options.output}`);
+  } else {
+    console.log(formatted);
+  }
+}
+
 function main(): void {
   const options = parseCliArgs(process.argv.slice(2));
 
@@ -232,6 +282,9 @@ function main(): void {
         process.exit(1);
       }
       showChanges(options.db, options.args[0]);
+      break;
+    case 'export':
+      runExport(options);
       break;
     default:
       console.error(`Unknown command: ${options.command}`);

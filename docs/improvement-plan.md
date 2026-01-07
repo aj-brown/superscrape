@@ -112,17 +112,17 @@ Add export capability for pipeline integration.
 **Files**: `src/export.ts` (new), `src/stats-cli.ts`
 
 **Tasks**:
-- [ ] Create `src/export.ts` with export logic
-- [ ] Add `export` command to stats CLI
-- [ ] Support `--format csv|json` flag
-- [ ] Support `--since <duration>` filter (e.g., `7d`, `30d`)
-- [ ] Support `--category <name>` filter
-- [ ] Support `--output <file>` (default: stdout)
+- [x] Create `src/export.ts` with export logic
+- [x] Add `export` command to stats CLI
+- [x] Support `--format csv|json` flag
+- [x] Support `--since <duration>` filter (e.g., `7d`, `30d`)
+- [x] Support `--category <name>` filter
+- [x] Support `--output <file>` (default: stdout)
 
 **Verification**:
-- [ ] Unit test: CSV output has correct headers and escaping
-- [ ] Unit test: JSON output is valid array of objects
-- [ ] Unit test: date filtering returns correct range
+- [x] Unit test: CSV output has correct headers and escaping
+- [x] Unit test: JSON output is valid array of objects
+- [x] Unit test: date filtering returns correct range
 - [ ] Integration test: export piped to file matches DB query
 - [ ] Manual: `npm run stats -- export --format csv --since 7d > export.csv`
 
