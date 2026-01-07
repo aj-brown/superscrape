@@ -120,9 +120,9 @@ npm run dev -- --all --dry-run
 **Goal:** Orchestrate scraping multiple categories sequentially with progress tracking.
 
 ### Tasks
-- [ ] Create `src/multi-scraper.ts` with `MultiCategoryScraper` class
-- [ ] Implement sequential scraping with existing `NewWorldScraper`
-- [ ] Add progress tracking and error handling
+- [x] Create `src/multi-scraper.ts` with `MultiCategoryScraper` class
+- [x] Implement sequential scraping with existing `NewWorldScraper`
+- [x] Add progress tracking and error handling
 
 ### Key Interface
 ```typescript
@@ -157,11 +157,11 @@ class MultiCategoryScraper {
 ### Validation & Tests
 **File:** `tests/multi-scraper.test.ts`
 
-- [ ] `scrapes categories sequentially` - Calls scrapeCategory for each
-- [ ] `continues after category failure` - Error doesn't stop other categories
-- [ ] `tracks progress correctly` - completed/failed counts accurate
-- [ ] `calls onProgress callback` - Callback invoked after each category
-- [ ] `saves products to database` - saveProducts called with results
+- [x] `scrapes categories sequentially` - Calls scrapeCategory for each
+- [x] `continues after category failure` - Error doesn't stop other categories
+- [x] `tracks progress correctly` - completed/failed counts accurate
+- [x] `calls onProgress callback` - Callback invoked after each category
+- [x] `saves products to database` - saveProducts called with results
 
 **Manual validation:** Run `npm test` - all multi-scraper tests pass
 
