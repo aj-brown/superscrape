@@ -1,0 +1,1498 @@
+{
+  "scrapeDate": "2026-01-07T05:31:12.973Z",
+  "categories": [],
+  "fruitProducts": [
+    {
+      "productId": "5045821-EA-000",
+      "name": "Blueberries",
+      "displayName": "125g",
+      "price": 5.99,
+      "pricePerUnit": 47.92,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046542-KGM-000",
+      "name": "Bananas",
+      "displayName": "kg",
+      "price": 3.69,
+      "pricePerUnit": 3.69,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Philippines"
+    },
+    {
+      "productId": "5028110-EA-000",
+      "name": "Avocado",
+      "displayName": "ea",
+      "price": 1.79,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5040020-EA-000",
+      "name": "Gold Pineapple",
+      "displayName": "1pk",
+      "price": 5.49,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Philippines"
+    },
+    {
+      "productId": "5040093-EA-000",
+      "name": "NZ Strawberries",
+      "displayName": "250g",
+      "price": 5.29,
+      "pricePerUnit": 21.16,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046582-KGM-000",
+      "name": "Yellow Flesh Nectarines",
+      "displayName": "kg",
+      "price": 9.49,
+      "pricePerUnit": 9.49,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046912-KGM-000",
+      "name": "Hunny Nectarines",
+      "displayName": "kg",
+      "price": 7.99,
+      "pricePerUnit": 7.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5266159-EA-000",
+      "brand": "Pams",
+      "name": "Cherries",
+      "displayName": "700g",
+      "price": 9.99,
+      "pricePerUnit": 14.27,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046550-KGM-000",
+      "name": "Yellow Flesh Peaches",
+      "displayName": "kg",
+      "price": 10.99,
+      "pricePerUnit": 10.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5039995-KGM-000",
+      "name": "Mandarins",
+      "displayName": "kg",
+      "price": 5.99,
+      "pricePerUnit": 5.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5039945-KGM-000",
+      "name": "Granny Smith Apples",
+      "displayName": "kg",
+      "price": 6.49,
+      "pricePerUnit": 6.49,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5040702-EA-000",
+      "brand": "Yummy Fruit",
+      "name": "Royal Gala Apples",
+      "displayName": "1.5kg",
+      "price": 10.99,
+      "pricePerUnit": 7.33,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046540-KGM-000",
+      "name": "Apricots",
+      "displayName": "kg",
+      "price": 13.99,
+      "pricePerUnit": 13.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5040916-EA-000",
+      "name": "Red Seedless Grapes",
+      "displayName": "500g",
+      "price": 9.99,
+      "pricePerUnit": 19.98,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Peru"
+    },
+    {
+      "productId": "5039977-KGM-000",
+      "name": "Gold Kiwifruit",
+      "displayName": "kg",
+      "price": 15.99,
+      "pricePerUnit": 15.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046525-KGM-000",
+      "name": "Royal Gala Apples",
+      "displayName": "kg",
+      "price": 8.99,
+      "pricePerUnit": 8.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046462-KGM-000",
+      "name": "Ambrosia Apples",
+      "displayName": "kg",
+      "price": 8.99,
+      "pricePerUnit": 8.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5039976-KGM-000",
+      "name": "Green Kiwifruit",
+      "displayName": "kg",
+      "price": 14.99,
+      "pricePerUnit": 14.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Italy"
+    },
+    {
+      "productId": "5046566-KGM-000",
+      "name": "Seedless Green Grapes",
+      "displayName": "kg",
+      "price": 16.99,
+      "pricePerUnit": 16.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of USA"
+    },
+    {
+      "productId": "5046454-KGM-000",
+      "name": "Seedless Red Grapes",
+      "displayName": "kg",
+      "price": 16.99,
+      "pricePerUnit": 16.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of USA"
+    },
+    {
+      "productId": "5046547-EA-000",
+      "name": "Red Watermelon",
+      "displayName": "ea",
+      "price": 12.99,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046477-KGM-000",
+      "name": "Lemons",
+      "displayName": "kg",
+      "price": 8.99,
+      "pricePerUnit": 8.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5040015-KGM-000",
+      "name": "Bosc Beurre Pears",
+      "displayName": "kg",
+      "price": 5.99,
+      "pricePerUnit": 5.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of USA"
+    },
+    {
+      "productId": "5046659-KGM-000",
+      "name": "Red Seedless Cut Watermelon",
+      "displayName": "kg",
+      "price": 4.99,
+      "pricePerUnit": 4.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046447-EA-000",
+      "name": "Pomegranate",
+      "displayName": "ea",
+      "price": 2.99,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of USA"
+    },
+    {
+      "productId": "5039996-EA-000",
+      "name": "Mango",
+      "displayName": "ea",
+      "price": 3.99,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Peru"
+    },
+    {
+      "productId": "5040003-EA-000",
+      "name": "Rockmelon",
+      "displayName": "ea",
+      "price": 5.99,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046650-KGM-000",
+      "name": "Red Plums",
+      "displayName": "kg",
+      "price": 10.99,
+      "pricePerUnit": 10.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Chile"
+    },
+    {
+      "productId": "5046607-KGM-000",
+      "name": "Nectarines White Flesh",
+      "displayName": "kg",
+      "price": 9.49,
+      "pricePerUnit": 9.49,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5045844-EA-000",
+      "name": "Dragonfruit Pitahaya",
+      "displayName": "ea",
+      "price": 3.99,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Vietnam"
+    },
+    {
+      "productId": "5046725-KGM-000",
+      "name": "Angelys Pears",
+      "displayName": "kg",
+      "price": 6.29,
+      "pricePerUnit": 6.29,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046496-EA-000",
+      "name": "Cut Rock Melon",
+      "displayName": "ea",
+      "price": 5.99,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5286628-KGM-000",
+      "name": "Lemons",
+      "displayName": "kg",
+      "price": 8.99,
+      "pricePerUnit": 8.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of USA"
+    },
+    {
+      "productId": "5046620-KGM-000",
+      "name": "Nashi Pears",
+      "displayName": "kg",
+      "price": 5.99,
+      "pricePerUnit": 5.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of China"
+    },
+    {
+      "productId": "5045815-EA-000",
+      "brand": "Pams",
+      "name": "Nectarines",
+      "displayName": "1kg",
+      "price": 9.49,
+      "pricePerUnit": 9.49,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5039993-KGM-000",
+      "name": "Limes",
+      "displayName": "kg",
+      "price": 15.99,
+      "pricePerUnit": 15.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Vietnam"
+    },
+    {
+      "productId": "5045817-EA-000",
+      "brand": "Pams",
+      "name": "Apricots",
+      "displayName": "kg",
+      "price": 12.99,
+      "pricePerUnit": 12.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046612-KGM-000",
+      "name": "Summer Kiss Valencia Oranges",
+      "displayName": "KG",
+      "price": 4.99,
+      "pricePerUnit": 4.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5236162-KGM-000",
+      "name": "Mandarins",
+      "displayName": "kg",
+      "price": 6.99,
+      "pricePerUnit": 6.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046141-EA-000",
+      "name": "Blackberries",
+      "displayName": "125g",
+      "price": 6.99,
+      "pricePerUnit": 55.92,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046391-EA-000",
+      "brand": "Pams",
+      "name": "Seasonal Fruit Medley",
+      "displayName": "400g",
+      "price": 9.99,
+      "pricePerUnit": 24.98,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046048-EA-000",
+      "name": "Raspberries",
+      "displayName": "125g",
+      "price": 8.49,
+      "pricePerUnit": 67.92,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5046441-KGM-000",
+      "name": "Ya Pears",
+      "displayName": "kg",
+      "price": 4.79,
+      "pricePerUnit": 4.79,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of China"
+    },
+    {
+      "productId": "5048720-EA-000",
+      "name": "Pomegranate Arils",
+      "displayName": "100g",
+      "price": 7.29,
+      "pricePerUnit": 72.9,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of India"
+    },
+    {
+      "productId": "5046215-EA-000",
+      "name": "Lychee",
+      "displayName": "400g",
+      "price": 25.99,
+      "pricePerUnit": 64.98,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of Australia"
+    },
+    {
+      "productId": "5045947-EA-000",
+      "name": "NZ Organic Blueberries",
+      "displayName": "125g",
+      "price": 5.99,
+      "pricePerUnit": 47.92,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5344936-EA-000",
+      "name": "Green Grapes",
+      "displayName": "1.2kg",
+      "price": 19.99,
+      "pricePerUnit": 16.66,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of China"
+    },
+    {
+      "productId": "5344397-EA-000",
+      "brand": "CHERRIES",
+      "name": "Fresh Cherries",
+      "displayName": "1kg",
+      "price": 20.99,
+      "pricePerUnit": 20.99,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    },
+    {
+      "productId": "5340740-EA-000",
+      "brand": "Healthy n Fresh",
+      "name": "China Red Fresh Pomelo",
+      "displayName": "1pk",
+      "price": 5.49,
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of China"
+    },
+    {
+      "productId": "5338846-EA-000",
+      "brand": "Rockit Apple",
+      "name": "Family Pack Fruit",
+      "displayName": "586g",
+      "price": 9.99,
+      "pricePerUnit": 17.05,
+      "unitOfMeasure": "1kg",
+      "category": "Fruit & Vegetables",
+      "subcategory": "Fruit",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ],
+      "origin": "Product of New Zealand"
+    }
+  ],
+  "milkProducts": [
+    {
+      "productId": "5201479-EA-000",
+      "brand": "Pams Value",
+      "name": "Standard Milk",
+      "displayName": "2l",
+      "price": 4.56,
+      "pricePerUnit": 2.28,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5201490-EA-000",
+      "brand": "Pams Value",
+      "name": "Standard Milk",
+      "displayName": "3l",
+      "price": 6.79,
+      "pricePerUnit": 2.26,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5201487-EA-000",
+      "brand": "Pams Value",
+      "name": "Lite Milk",
+      "displayName": "2l",
+      "price": 4.56,
+      "pricePerUnit": 2.28,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5201800-EA-000",
+      "brand": "Pams Value",
+      "name": "Standard Milk",
+      "displayName": "1l",
+      "price": 2.99,
+      "pricePerUnit": 2.99,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5000527-EA-000",
+      "brand": "Anchor",
+      "name": "Blue Milk",
+      "displayName": "2l",
+      "price": 5.54,
+      "pricePerUnit": 2.77,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5201489-EA-000",
+      "brand": "Pams Value",
+      "name": "Lite Milk",
+      "displayName": "3l",
+      "price": 6.79,
+      "pricePerUnit": 2.26,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5000518-EA-000",
+      "brand": "Anchor",
+      "name": "Blue Milk",
+      "displayName": "1l",
+      "price": 3.37,
+      "pricePerUnit": 3.37,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5201801-EA-000",
+      "brand": "Pams Value",
+      "name": "Lite Milk",
+      "displayName": "1l",
+      "price": 2.99,
+      "pricePerUnit": 2.99,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5000523-EA-000",
+      "brand": "Anchor",
+      "name": "Lite Milk",
+      "displayName": "2l",
+      "price": 5.54,
+      "pricePerUnit": 2.77,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5016750-EA-000",
+      "brand": "Anchor",
+      "name": "Blue Milk",
+      "displayName": "3l",
+      "price": 8.19,
+      "pricePerUnit": 2.73,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5201486-EA-000",
+      "brand": "Pams Value",
+      "name": "Trim Milk",
+      "displayName": "2l",
+      "price": 4.56,
+      "pricePerUnit": 2.28,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5004752-EA-000",
+      "brand": "Pams",
+      "name": "Standard UHT Milk",
+      "displayName": "1l",
+      "price": 2.39,
+      "pricePerUnit": 2.39,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5025424-EA-000",
+      "brand": "Anchor",
+      "name": "Calci + Trim Milk",
+      "displayName": "1l",
+      "price": 3.61,
+      "pricePerUnit": 3.61,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5000522-EA-000",
+      "brand": "Anchor",
+      "name": "Lite Milk",
+      "displayName": "1l",
+      "price": 3.37,
+      "pricePerUnit": 3.37,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5000519-EA-000",
+      "brand": "Anchor",
+      "name": "Calci + Trim Milk",
+      "displayName": "2l",
+      "price": 6.68,
+      "pricePerUnit": 3.34,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5090710-EA-000",
+      "brand": "Anchor",
+      "name": "Blue Milk",
+      "displayName": "300ml",
+      "price": 1.6,
+      "pricePerUnit": 5.33,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5266784-EA-000",
+      "brand": "Simply Milk",
+      "name": "Standard Milk",
+      "displayName": "2l",
+      "price": 5.02,
+      "pricePerUnit": 2.51,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5000520-EA-000",
+      "brand": "Anchor",
+      "name": "Trim Milk",
+      "displayName": "1l",
+      "price": 3.37,
+      "pricePerUnit": 3.37,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5007415-EA-000",
+      "brand": "Anchor",
+      "name": "Zero Lacto Blue Milk",
+      "displayName": "1l",
+      "price": 4.97,
+      "pricePerUnit": 4.97,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5004771-EA-000",
+      "brand": "Pams",
+      "name": "Lite UHT Milk",
+      "displayName": "1l",
+      "price": 2.39,
+      "pricePerUnit": 2.39,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5283856-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "A2 Protein Homogenised Milk",
+      "displayName": "1.5l",
+      "price": 7.29,
+      "pricePerUnit": 4.86,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5123764-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Organic Homogenised Milk",
+      "displayName": "750ml",
+      "price": 4.39,
+      "pricePerUnit": 5.85,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5027127-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Organic Homogenised Milk",
+      "displayName": "1.5l",
+      "price": 7.49,
+      "pricePerUnit": 4.99,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5027129-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Organic Non-homogenised Milk",
+      "displayName": "1.5l",
+      "price": 7.49,
+      "pricePerUnit": 4.99,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5112558-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Organic Light Milk",
+      "displayName": "750ml",
+      "price": 4.39,
+      "pricePerUnit": 5.85,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5010693-EA-000",
+      "brand": "Anchor",
+      "name": "Calci-Yum Chocolate Flavour Milk",
+      "displayName": "250ml",
+      "price": 1.59,
+      "pricePerUnit": 6.36,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5002730-EA-000",
+      "brand": "Anchor",
+      "name": "Blue UHT Longlife Milk",
+      "displayName": "250ml",
+      "price": 1.89,
+      "pricePerUnit": 7.56,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5014608-EA-000",
+      "brand": "Meadow Fresh",
+      "name": "Calci Strong Cho-O-Block Flavoured Milk",
+      "displayName": "250ml",
+      "price": 1.49,
+      "pricePerUnit": 5.96,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5010431-EA-000",
+      "brand": "Nippy's",
+      "name": "Chocolate Flavoured Milk",
+      "displayName": "375ml",
+      "price": 3.49,
+      "pricePerUnit": 9.31,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5045269-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Chocolate Milk",
+      "displayName": "300ml",
+      "price": 4.89,
+      "pricePerUnit": 16.3,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5045266-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Chocolate Milk",
+      "displayName": "750ml",
+      "price": 8.49,
+      "pricePerUnit": 11.32,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5002727-EA-000",
+      "brand": "Anchor",
+      "name": "Blue UHT Milk",
+      "displayName": "1l",
+      "price": 3.79,
+      "pricePerUnit": 3.79,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5010691-EA-000",
+      "brand": "Anchor",
+      "name": "Calci-Yum Milk With Banana Flavour",
+      "displayName": "250ml",
+      "price": 1.59,
+      "pricePerUnit": 6.36,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5014607-EA-000",
+      "brand": "Meadow Fresh",
+      "name": "Calci Strong Super Strawberry Flavoured Milk",
+      "displayName": "250ml",
+      "price": 1.49,
+      "pricePerUnit": 5.96,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5227964-EA-000",
+      "brand": "Mammoth Supply Co.",
+      "name": "Protein Fix Iced Chocolate Flavoured Milk",
+      "displayName": "600ml",
+      "price": 6.69,
+      "pricePerUnit": 11.15,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5227982-EA-000",
+      "brand": "Primo",
+      "name": "Chocolate Supremo Flavoured Milk",
+      "displayName": "1.5l",
+      "price": 7.29,
+      "pricePerUnit": 4.86,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5080775-EA-000",
+      "brand": "Puhoi Valley",
+      "name": "Real Chocolate Flavoured Milk",
+      "displayName": "300ml",
+      "price": 4.39,
+      "pricePerUnit": 14.63,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5038267-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Double Espresso Milk",
+      "displayName": "300ml",
+      "price": 4.89,
+      "pricePerUnit": 16.3,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5200682-EA-000",
+      "brand": "Puhoi Valley",
+      "name": "Arabica Espresso Flavoured Milk",
+      "displayName": "300ml",
+      "price": 4.39,
+      "pricePerUnit": 14.63,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5080774-EA-000",
+      "brand": "Puhoi Valley",
+      "name": "Real Chocolate Flavoured Milk",
+      "displayName": "750ml",
+      "price": 8.39,
+      "pricePerUnit": 11.19,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5287554-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Lactose Free Chocolate Flavoured Milk",
+      "displayName": "300ml",
+      "price": 4.89,
+      "pricePerUnit": 16.3,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5002731-EA-000",
+      "brand": "Anchor",
+      "name": "Lite UHT Reduced Fat Milk",
+      "displayName": "1l",
+      "price": 3.79,
+      "pricePerUnit": 3.79,
+      "unitOfMeasure": "1L",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5200317-EA-000",
+      "brand": "Lewis Road Creamery",
+      "name": "Fresh Strawberries & Cream Milk",
+      "displayName": "300ml",
+      "price": 4.89,
+      "pricePerUnit": 16.3,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5003891-EA-000",
+      "brand": "Pams",
+      "name": "Instant Whole Milk Powder",
+      "displayName": "1kg",
+      "price": 12.79,
+      "pricePerUnit": 1.28,
+      "unitOfMeasure": "100g",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5080776-EA-000",
+      "brand": "Puhoi Valley",
+      "name": "Caramel & White Chocolate Flavoured Milk",
+      "displayName": "300ml",
+      "price": 4.39,
+      "pricePerUnit": 14.63,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5227962-EA-000",
+      "brand": "Mammoth Supply Co.",
+      "name": "Double Shot Fix Iced Strong Coffee Flavoured Milk",
+      "displayName": "600ml",
+      "price": 6.69,
+      "pricePerUnit": 11.15,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5003892-EA-000",
+      "brand": "Pams",
+      "name": "Instant Whole Milk Powder",
+      "displayName": "400g",
+      "price": 7.89,
+      "pricePerUnit": 1.97,
+      "unitOfMeasure": "100g",
+      "category": "Fridge, Deli & Eggs",
+      "subcategory": "Milk",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5086559-EA-000",
+      "brand": "Puhoi Valley",
+      "name": "Caramel & White Chocolate Flavoured Milk",
+      "displayName": "750ml",
+      "price": 8.39,
+      "pricePerUnit": 11.19,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5227983-EA-000",
+      "brand": "Primo",
+      "name": "Banana Blast Flavoured Milk",
+      "displayName": "1.5l",
+      "price": 7.29,
+      "pricePerUnit": 4.86,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    },
+    {
+      "productId": "5227966-EA-000",
+      "brand": "Mammoth Supply Co.",
+      "name": "Protein Fix Iced Original Coffee Flavoured Milk",
+      "displayName": "600ml",
+      "price": 6.69,
+      "pricePerUnit": 11.15,
+      "unitOfMeasure": "1L",
+      "category": "Hot & Cold Drinks",
+      "subcategory": "Hot Chocolate & Milk Drinks",
+      "availability": [
+        "IN_STORE",
+        "ONLINE"
+      ]
+    }
+  ]
+}
