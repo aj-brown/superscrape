@@ -15,8 +15,16 @@ export interface Product {
   unitOfMeasure?: string;
   category: string;
   subcategory?: string;
+  categoryLevel2?: string;
   availability: string[];
   origin?: string;
+  saleType?: string;
+  promoPrice?: number;
+  promoPricePerUnit?: number;
+  promoType?: string;
+  promoDescription?: string;
+  promoRequiresCard?: boolean;
+  promoLimit?: number;
 }
 
 export interface CategoryInfo {
@@ -100,6 +108,13 @@ export function parseProductFromApi(raw: Record<string, unknown>): Product {
     | undefined;
   const firstCategory = categoryTrees?.[0];
 
+  // Find best promotion from promotions array
+  const promotions = raw.promotions as Array<Record<string, unknown>> | undefined;
+  const bestPromo = promotions?.find((p) => p.bestPromotion === true) ?? promotions?.[0];
+  const promoComparativePrice = bestPromo?.comparativePrice as
+    | Record<string, unknown>
+    | undefined;
+
   return {
     productId: raw.productId as string,
     brand: raw.brand as string | undefined,
@@ -112,8 +127,18 @@ export function parseProductFromApi(raw: Record<string, unknown>): Product {
     unitOfMeasure: comparativePrice?.measureDescription as string | undefined,
     category: firstCategory?.level0 || 'Unknown',
     subcategory: firstCategory?.level1,
+    categoryLevel2: firstCategory?.level2,
     availability: (raw.availability as string[]) || [],
     origin: raw.originStatement as string | undefined,
+    saleType: raw.saleType as string | undefined,
+    promoPrice: bestPromo ? ((bestPromo.rewardValue as number) || 0) / 100 : undefined,
+    promoPricePerUnit: promoComparativePrice
+      ? ((promoComparativePrice.pricePerUnit as number) || 0) / 100
+      : undefined,
+    promoType: bestPromo?.rewardType as string | undefined,
+    promoDescription: bestPromo?.description as string | undefined,
+    promoRequiresCard: bestPromo?.cardDependencyFlag as boolean | undefined,
+    promoLimit: bestPromo?.maxQuantity as number | undefined,
   };
 }
 

@@ -118,29 +118,29 @@ npm test -- tests/storage/repository.test.ts
 ## Phase 3: Extend Product Interface
 
 ### Tasks
-- [ ] Update `src/utils.ts` Product interface to include:
-  - [ ] `categoryLevel2?: string`
-  - [ ] `saleType?: string`
-  - [ ] `promoPrice?: number` (from promotions[0].rewardValue / 100)
-  - [ ] `promoPricePerUnit?: number`
-  - [ ] `promoType?: string` (rewardType: "NEW_PRICE", etc.)
-  - [ ] `promoDescription?: string`
-  - [ ] `promoRequiresCard?: boolean` (cardDependencyFlag)
-  - [ ] `promoLimit?: number`
-- [ ] Update `parseProduct()` in utils.ts to:
-  - [ ] Extract categoryLevel2 from categoryTrees[0].level2
-  - [ ] Extract saleType
-  - [ ] Find best promotion (where bestPromotion=true) from promotions[]
-  - [ ] Parse promo fields from that promotion
-- [ ] Create `src/storage/index.ts` to export public API
+- [x] Update `src/utils.ts` Product interface to include:
+  - [x] `categoryLevel2?: string`
+  - [x] `saleType?: string`
+  - [x] `promoPrice?: number` (from promotions[0].rewardValue / 100)
+  - [x] `promoPricePerUnit?: number`
+  - [x] `promoType?: string` (rewardType: "NEW_PRICE", etc.)
+  - [x] `promoDescription?: string`
+  - [x] `promoRequiresCard?: boolean` (cardDependencyFlag)
+  - [x] `promoLimit?: number`
+- [x] Update `parseProduct()` in utils.ts to:
+  - [x] Extract categoryLevel2 from categoryTrees[0].level2
+  - [x] Extract saleType
+  - [x] Find best promotion (where bestPromotion=true) from promotions[]
+  - [x] Parse promo fields from that promotion
+- [x] Create `src/storage/index.ts` to export public API
 
 ### Tests
-- [ ] Existing tests still pass
-- [ ] parseProduct extracts categoryLevel2 from categoryTrees[0].level2
-- [ ] parseProduct extracts saleType
-- [ ] parseProduct extracts promo fields when promotions[] exists
-- [ ] parseProduct finds bestPromotion=true when multiple promos
-- [ ] parseProduct handles missing promotions[] gracefully (all promo fields undefined)
+- [x] Existing tests still pass
+- [x] parseProduct extracts categoryLevel2 from categoryTrees[0].level2
+- [x] parseProduct extracts saleType
+- [x] parseProduct extracts promo fields when promotions[] exists
+- [x] parseProduct finds bestPromotion=true when multiple promos
+- [x] parseProduct handles missing promotions[] gracefully (all promo fields undefined)
 
 ### Verification
 ```bash
