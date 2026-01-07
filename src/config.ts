@@ -58,5 +58,7 @@ export function mergeConfigWithCli(cli: CliOptions, config: Config | undefined):
     help: cli.help,
     logFormat: config.logFormat ?? cli.logFormat,
     logLevel: config.logLevel ?? cli.logLevel,
+    resume: cli.resume,
+    runId: cli.runId,
   };
 }

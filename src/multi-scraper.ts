@@ -1,6 +1,11 @@
 import type { FlatCategory } from './categories';
 import { NewWorldScraper } from './scraper';
-import { saveProducts } from './storage/repository';
+import {
+  saveProducts,
+  createRun,
+  updateCategoryRun,
+  completeRun,
+} from './storage/repository';
 import { productsToRecordsAndSnapshots } from './storage/converters';
 
 export interface MultiScraperConfig {
@@ -8,6 +13,7 @@ export interface MultiScraperConfig {
   maxPages: number;
   headless: boolean;
   dbPath: string;
+  runId?: number;
   onProgress?: (progress: ScrapeProgress) => void;
 }
 
@@ -19,6 +25,7 @@ export interface CategoryResult {
 }
 
 export interface ScrapeProgress {
+  runId: number;
   total: number;
   completed: number;
   failed: number;
@@ -35,7 +42,15 @@ export class MultiCategoryScraper {
   }
 
   async run(): Promise<ScrapeProgress> {
+    // Create or reuse run ID
+    const categorySlugs = this.config.categories.map(
+      (c) => `${c.category0} > ${c.category1}`
+    );
+    const runId =
+      this.config.runId ?? createRun(this.config.dbPath, categorySlugs);
+
     const progress: ScrapeProgress = {
+      runId,
       total: this.config.categories.length,
       completed: 0,
       failed: 0,
@@ -49,6 +64,11 @@ export class MultiCategoryScraper {
       for (const category of this.config.categories) {
         const categoryPath = `${category.category0} > ${category.category1}`;
         progress.current = categoryPath;
+
+        // Mark category as in progress
+        updateCategoryRun(this.config.dbPath, runId, categoryPath, {
+          status: 'in_progress',
+        });
 
         try {
           const products = await this.scraper.scrapeCategory(
@@ -64,6 +84,13 @@ export class MultiCategoryScraper {
             saveProducts(this.config.dbPath, records, snapshots);
           }
 
+          // Mark category as completed
+          updateCategoryRun(this.config.dbPath, runId, categoryPath, {
+            status: 'completed',
+            lastPage: this.config.maxPages,
+            productCount: products.length,
+          });
+
           progress.completed++;
           progress.results.push({
             category: categoryPath,
@@ -73,8 +100,15 @@ export class MultiCategoryScraper {
 
           console.log(`✅ ${categoryPath}: ${products.length} products`);
         } catch (error) {
-          progress.failed++;
           const errorMessage = error instanceof Error ? error.message : String(error);
+
+          // Mark category as failed
+          updateCategoryRun(this.config.dbPath, runId, categoryPath, {
+            status: 'failed',
+            error: errorMessage,
+          });
+
+          progress.failed++;
           progress.results.push({
             category: categoryPath,
             success: false,
@@ -87,6 +121,9 @@ export class MultiCategoryScraper {
 
         this.config.onProgress?.(progress);
       }
+
+      // Mark run as completed
+      completeRun(this.config.dbPath, runId);
     } finally {
       if (this.scraper) {
         await this.scraper.close();

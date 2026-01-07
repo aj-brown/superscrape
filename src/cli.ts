@@ -11,6 +11,8 @@ export interface CliOptions {
   logFormat: LogFormat;
   logLevel: LogLevel;
   configPath?: string;
+  resume: boolean;
+  runId?: number;
 }
 
 /**
@@ -64,6 +66,13 @@ export function parseCliArgs(args: string[]): CliOptions {
       config: {
         type: 'string',
       },
+      resume: {
+        type: 'boolean',
+        default: false,
+      },
+      'run-id': {
+        type: 'string',
+      },
     },
     allowPositionals: true,
   });
@@ -78,6 +87,9 @@ export function parseCliArgs(args: string[]): CliOptions {
   const noHeadless = values['no-headless'] as boolean;
   const headless = noHeadless ? false : (values.headless as boolean);
 
+  const runIdStr = values['run-id'] as string | undefined;
+  const runId = runIdStr ? parseInt(runIdStr, 10) : undefined;
+
   return {
     filter,
     maxPages: parseInt(values.pages as string, 10),
@@ -87,6 +99,8 @@ export function parseCliArgs(args: string[]): CliOptions {
     logFormat: values['log-format'] as LogFormat,
     logLevel: values['log-level'] as LogLevel,
     configPath: values.config as string | undefined,
+    resume: values.resume as boolean,
+    runId,
   };
 }
 
@@ -107,6 +121,8 @@ Options:
   --log-format        Log format: text or json (default: text)
   --log-level         Log level: debug, info, warn, error (default: info)
   --config            Path to JSON config file
+  --resume            Resume last incomplete run
+  --run-id <id>       Resume specific run by ID
   --help, -h          Show this help message
 
 Examples:
@@ -117,5 +133,7 @@ Examples:
   npm run dev -- -c "Pantry" --pages 5
   npm run dev -- --log-format json --log-level debug
   npm run dev -- --config config.json
+  npm run dev -- --resume
+  npm run dev -- --run-id 5
 `);
 }

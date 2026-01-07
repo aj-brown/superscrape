@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseCliArgs, printUsage } from './cli';
-import { parseCategories, selectCategories, type CategoryNode } from './categories';
+import { parseCategories, selectCategories, type CategoryNode, type FlatCategory } from './categories';
 import { MultiCategoryScraper } from './multi-scraper';
-import { initDatabase } from './storage';
+import { initDatabase, getIncompleteRun, getRunStatus } from './storage';
 
 const DATA_DIR = './data';
 const DB_PATH = path.join(DATA_DIR, 'prices.db');
@@ -63,12 +63,63 @@ async function main() {
   initDatabase(DB_PATH);
   console.log(`✅ Database ready at ${DB_PATH}\n`);
 
+  // Handle resume mode
+  let runId: number | undefined;
+  let categoriesToScrape: FlatCategory[] = selectedCategories;
+
+  if (options.resume || options.runId) {
+    let incompleteRun;
+
+    if (options.runId) {
+      // Resume specific run
+      const runStatus = getRunStatus(DB_PATH, options.runId);
+      if (!runStatus) {
+        console.error(`❌ Run ${options.runId} not found`);
+        process.exit(1);
+      }
+      if (runStatus.status === 'completed') {
+        console.error(`❌ Run ${options.runId} is already completed`);
+        process.exit(1);
+      }
+      incompleteRun = {
+        id: runStatus.id,
+        startedAt: runStatus.startedAt,
+        pendingCategories: runStatus.categories
+          .filter((c) => c.status === 'pending' || c.status === 'failed')
+          .map((c) => c.categorySlug),
+      };
+    } else {
+      // Resume last incomplete run
+      incompleteRun = getIncompleteRun(DB_PATH);
+    }
+
+    if (!incompleteRun) {
+      console.log('ℹ️  No incomplete run found, starting fresh');
+    } else {
+      runId = incompleteRun.id;
+      console.log(`🔄 Resuming run ${runId} (started ${incompleteRun.startedAt})`);
+      console.log(`📋 ${incompleteRun.pendingCategories.length} categories remaining\n`);
+
+      // Filter categories to only pending ones
+      categoriesToScrape = selectedCategories.filter((cat) => {
+        const categoryPath = `${cat.category0} > ${cat.category1}`;
+        return incompleteRun.pendingCategories.includes(categoryPath);
+      });
+
+      if (categoriesToScrape.length === 0) {
+        console.log('✅ All categories already completed!');
+        return;
+      }
+    }
+  }
+
   // Run multi-category scraper
   const scraper = new MultiCategoryScraper({
-    categories: selectedCategories,
+    categories: categoriesToScrape,
     maxPages: options.maxPages,
     headless: options.headless,
     dbPath: DB_PATH,
+    runId,
     onProgress: (progress) => {
       const pct = Math.round(((progress.completed + progress.failed) / progress.total) * 100);
       process.stdout.write(`\r📈 Progress: ${pct}% (${progress.completed} done, ${progress.failed} failed)`);

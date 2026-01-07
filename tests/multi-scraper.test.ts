@@ -21,6 +21,9 @@ vi.mock('../src/scraper', () => ({
 
 vi.mock('../src/storage/repository', () => ({
   saveProducts: vi.fn(),
+  createRun: vi.fn().mockReturnValue(1),
+  updateCategoryRun: vi.fn(),
+  completeRun: vi.fn(),
 }));
 
 vi.mock('../src/storage/converters', () => ({

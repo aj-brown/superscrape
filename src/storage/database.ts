@@ -45,6 +45,27 @@ CREATE TABLE IF NOT EXISTS price_snapshots (
 
 CREATE INDEX IF NOT EXISTS idx_snapshots_product ON price_snapshots(product_id);
 CREATE INDEX IF NOT EXISTS idx_snapshots_date ON price_snapshots(scraped_at);
+
+-- Scrape run tracking for resume/checkpoint support
+CREATE TABLE IF NOT EXISTS scrape_runs (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  started_at    TEXT NOT NULL,
+  completed_at  TEXT,
+  status        TEXT NOT NULL DEFAULT 'in_progress'
+);
+
+CREATE TABLE IF NOT EXISTS category_runs (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  run_id        INTEGER NOT NULL REFERENCES scrape_runs(id),
+  category_slug TEXT NOT NULL,
+  status        TEXT NOT NULL DEFAULT 'pending',
+  last_page     INTEGER,
+  product_count INTEGER,
+  error         TEXT,
+  UNIQUE(run_id, category_slug)
+);
+
+CREATE INDEX IF NOT EXISTS idx_category_runs_run ON category_runs(run_id);
 `;
 
 export function initDatabase(path: string): DatabaseConnection {

@@ -1,5 +1,12 @@
 import { getDatabase } from './database';
-import type { ProductRecord, PriceSnapshotRecord } from './types';
+import type {
+  ProductRecord,
+  PriceSnapshotRecord,
+  RunStatus,
+  IncompleteRun,
+  CategoryRunRecord,
+  CategoryRunUpdate,
+} from './types';
 
 export function upsertProduct(dbPath: string, product: ProductRecord): void {
   const db = getDatabase(dbPath);
@@ -100,4 +107,131 @@ export function getLatestPrices(dbPath: string): PriceSnapshotRecord[] {
     ) latest ON ps.product_id = latest.product_id AND ps.scraped_at = latest.max_scraped_at
   `);
   return stmt.all() as PriceSnapshotRecord[];
+}
+
+// Run tracking functions
+export function createRun(dbPath: string, categories: string[]): number {
+  const db = getDatabase(dbPath);
+  const now = new Date().toISOString();
+
+  const insertRun = db.prepare(`
+    INSERT INTO scrape_runs (started_at, status) VALUES (?, 'in_progress')
+  `);
+  const result = insertRun.run(now);
+  const runId = result.lastInsertRowid as number;
+
+  const insertCategory = db.prepare(`
+    INSERT INTO category_runs (run_id, category_slug, status) VALUES (?, ?, 'pending')
+  `);
+
+  for (const category of categories) {
+    insertCategory.run(runId, category);
+  }
+
+  return runId;
+}
+
+export function updateCategoryRun(
+  dbPath: string,
+  runId: number,
+  categorySlug: string,
+  update: CategoryRunUpdate
+): void {
+  const db = getDatabase(dbPath);
+  const stmt = db.prepare(`
+    UPDATE category_runs
+    SET status = ?, last_page = ?, product_count = ?, error = ?
+    WHERE run_id = ? AND category_slug = ?
+  `);
+  stmt.run(
+    update.status,
+    update.lastPage ?? null,
+    update.productCount ?? null,
+    update.error ?? null,
+    runId,
+    categorySlug
+  );
+}
+
+export function getRunStatus(dbPath: string, runId: number): RunStatus | null {
+  const db = getDatabase(dbPath);
+
+  const runStmt = db.prepare('SELECT * FROM scrape_runs WHERE id = ?');
+  const run = runStmt.get(runId) as
+    | { id: number; started_at: string; completed_at: string | null; status: string }
+    | undefined;
+
+  if (!run) {
+    return null;
+  }
+
+  const categoriesStmt = db.prepare(
+    'SELECT category_slug, status, last_page, product_count, error FROM category_runs WHERE run_id = ?'
+  );
+  const categoryRows = categoriesStmt.all(runId) as Array<{
+    category_slug: string;
+    status: string;
+    last_page: number | null;
+    product_count: number | null;
+    error: string | null;
+  }>;
+
+  const categories: CategoryRunRecord[] = categoryRows.map((row) => ({
+    categorySlug: row.category_slug,
+    status: row.status as CategoryRunRecord['status'],
+    lastPage: row.last_page ?? undefined,
+    productCount: row.product_count ?? undefined,
+    error: row.error ?? undefined,
+  }));
+
+  const completedCategories = categories.filter(
+    (c) => c.status === 'completed'
+  ).length;
+
+  return {
+    id: run.id,
+    startedAt: run.started_at,
+    completedAt: run.completed_at ?? undefined,
+    status: run.status as RunStatus['status'],
+    totalCategories: categories.length,
+    completedCategories,
+    categories,
+  };
+}
+
+export function getIncompleteRun(dbPath: string): IncompleteRun | null {
+  const db = getDatabase(dbPath);
+
+  const runStmt = db.prepare(`
+    SELECT id, started_at FROM scrape_runs
+    WHERE status = 'in_progress'
+    ORDER BY started_at DESC
+    LIMIT 1
+  `);
+  const run = runStmt.get() as { id: number; started_at: string } | undefined;
+
+  if (!run) {
+    return null;
+  }
+
+  const pendingStmt = db.prepare(`
+    SELECT category_slug FROM category_runs
+    WHERE run_id = ? AND status IN ('pending', 'failed')
+  `);
+  const pendingRows = pendingStmt.all(run.id) as Array<{ category_slug: string }>;
+
+  return {
+    id: run.id,
+    startedAt: run.started_at,
+    pendingCategories: pendingRows.map((r) => r.category_slug),
+  };
+}
+
+export function completeRun(dbPath: string, runId: number): void {
+  const db = getDatabase(dbPath);
+  const now = new Date().toISOString();
+  const stmt = db.prepare(`
+    UPDATE scrape_runs SET status = 'completed', completed_at = ? WHERE id = ?
+  `);
+  stmt.run(now, runId);
 }

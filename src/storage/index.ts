@@ -5,6 +5,11 @@ export {
   saveProducts,
   getProductHistory,
   getLatestPrices,
+  createRun,
+  updateCategoryRun,
+  getRunStatus,
+  getIncompleteRun,
+  completeRun,
 } from './repository';
 export {
   getPriceHistory as getPriceHistoryQuery,

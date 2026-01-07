@@ -138,17 +138,17 @@ Allow long scrapes to resume after failures.
 **Files**: `src/storage/database.ts`, `src/storage/repository.ts`, `src/multi-scraper.ts`, `src/cli.ts`
 
 **Tasks**:
-- [ ] Add `scrape_runs` table schema (id, started_at, completed_at, status)
-- [ ] Add `category_runs` table schema (run_id, category_slug, status, last_page, error)
-- [ ] Add repository functions: `createRun()`, `updateCategoryRun()`, `getIncompleteRun()`
-- [ ] Update `MultiCategoryScraper` to record progress after each category
-- [ ] Add `--resume` CLI flag to continue last incomplete run
-- [ ] Add `--run-id <id>` to resume specific run
+- [x] Add `scrape_runs` table schema (id, started_at, completed_at, status)
+- [x] Add `category_runs` table schema (run_id, category_slug, status, last_page, error)
+- [x] Add repository functions: `createRun()`, `updateCategoryRun()`, `getIncompleteRun()`
+- [x] Update `MultiCategoryScraper` to record progress after each category
+- [x] Add `--resume` CLI flag to continue last incomplete run
+- [x] Add `--run-id <id>` to resume specific run
 
 **Verification**:
-- [ ] Unit test: run record created with correct initial state
-- [ ] Unit test: category progress updated after completion
-- [ ] Unit test: `getIncompleteRun()` returns most recent incomplete
+- [x] Unit test: run record created with correct initial state
+- [x] Unit test: category progress updated after completion
+- [x] Unit test: `getIncompleteRun()` returns most recent incomplete
 - [ ] Integration test: interrupt scrape, resume completes remaining categories
 - [ ] Manual: kill process mid-scrape, verify `--resume` continues correctly
 

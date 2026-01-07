@@ -41,3 +41,34 @@ export interface CheckpointResult {
   walPages: number;
   movedPages: number;
 }
+
+export interface CategoryRunRecord {
+  categorySlug: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  lastPage?: number;
+  productCount?: number;
+  error?: string;
+}
+
+export interface RunStatus {
+  id: number;
+  startedAt: string;
+  completedAt?: string;
+  status: 'in_progress' | 'completed' | 'failed';
+  totalCategories: number;
+  completedCategories: number;
+  categories: CategoryRunRecord[];
+}
+
+export interface IncompleteRun {
+  id: number;
+  startedAt: string;
+  pendingCategories: string[];
+}
+
+export interface CategoryRunUpdate {
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  lastPage?: number;
+  productCount?: number;
+  error?: string;
+}
