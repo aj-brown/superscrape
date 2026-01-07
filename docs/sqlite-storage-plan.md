@@ -178,23 +178,23 @@ npm run dev
 ## Phase 5: Query Utilities
 
 ### Tasks
-- [ ] Add to `src/storage/repository.ts`:
-  - [ ] `getPriceHistory(productId)` - Get all snapshots for a product
-  - [ ] `getPriceChanges(productId)` - Show price deltas over time (price went up/down)
-  - [ ] `getProductsByCategory(category, subcategory?)` - Filter by category
-  - [ ] `getProductsOnPromo()` - Find products with active promotions
-  - [ ] `searchProducts(query)` - Text search on name/brand
+- [x] Add to `src/storage/queries.ts`:
+  - [x] `getPriceHistory(productId)` - Get all snapshots for a product
+  - [x] `getPriceChanges(productId)` - Show price deltas over time (price went up/down)
+  - [x] `getProductsByCategory(category, subcategory?)` - Filter by category
+  - [x] `getProductsOnPromo()` - Find products with active promotions
+  - [x] `searchProducts(query)` - Text search on name/brand
 
 ### Tests (`tests/storage/queries.test.ts`)
-- [ ] getPriceHistory returns chronological snapshots
-- [ ] getPriceChanges calculates correct deltas between snapshots
-- [ ] getPriceChanges returns empty array for single snapshot
-- [ ] getProductsByCategory filters by category
-- [ ] getProductsByCategory filters by subcategory when provided
-- [ ] getProductsOnPromo returns only products with promo_price set
-- [ ] searchProducts matches on product name (case-insensitive)
-- [ ] searchProducts matches on brand (case-insensitive)
-- [ ] searchProducts returns empty array for no matches
+- [x] getPriceHistory returns chronological snapshots
+- [x] getPriceChanges calculates correct deltas between snapshots
+- [x] getPriceChanges returns empty array for single snapshot
+- [x] getProductsByCategory filters by category
+- [x] getProductsByCategory filters by subcategory when provided
+- [x] getProductsOnPromo returns only products with promo_price set
+- [x] searchProducts matches on product name (case-insensitive)
+- [x] searchProducts matches on brand (case-insensitive)
+- [x] searchProducts returns empty array for no matches
 
 ### Verification
 ```bash
@@ -220,9 +220,9 @@ npm install -D @types/better-sqlite3
 
 ## Success Criteria
 
-- [ ] All tests pass
-- [ ] Database created at `./data/prices.db`
-- [ ] Products table populated with master data
-- [ ] Price snapshots table has one row per product per scrape
-- [ ] Running scraper multiple times creates price history
-- [ ] Existing JSON output still works
+- [x] All tests pass (99 tests passing)
+- [x] Database created at `./data/prices.db`
+- [x] Products table populated with master data
+- [x] Price snapshots table has one row per product per scrape
+- [x] Running scraper multiple times creates price history
+- [x] Existing JSON output still works

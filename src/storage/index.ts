@@ -7,6 +7,14 @@ export {
   getLatestPrices,
 } from './repository';
 export {
+  getPriceHistory as getPriceHistoryQuery,
+  getPriceChanges,
+  getProductsByCategory,
+  getProductsOnPromo,
+  searchProducts,
+  type PriceChange,
+} from './queries';
+export {
   productToRecord,
   productToSnapshot,
   productsToRecordsAndSnapshots,
