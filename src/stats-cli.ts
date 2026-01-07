@@ -11,7 +11,9 @@ import {
   getProductsByCategory,
   getProductsOnPromo,
   searchProducts,
+  listRuns,
 } from './storage/queries';
+import { getRunStatus } from './storage/repository';
 import { getDatabase } from './storage/database';
 import { exportData, formatCsv, formatJson } from './export';
 import type { ProductRecord } from './storage/types';
@@ -99,6 +101,8 @@ Commands:
   history <product_id>    Show price history for a product
   changes <product_id>    Show price changes for a product
   export                  Export data to CSV or JSON
+  runs                    List scrape runs
+  run <id>                Show details for a specific scrape run
 
 Examples:
   npx tsx src/stats-cli.ts summary
@@ -108,6 +112,8 @@ Examples:
   npx tsx src/stats-cli.ts history "product-123"
   npx tsx src/stats-cli.ts export --format csv --since 7d
   npx tsx src/stats-cli.ts export --format json --category "Pantry" -o export.json
+  npx tsx src/stats-cli.ts runs
+  npx tsx src/stats-cli.ts run 1
 `);
 }
 
@@ -240,6 +246,64 @@ function runExport(options: CliOptions): void {
   }
 }
 
+function showRuns(dbPath: string): void {
+  const runs = listRuns(dbPath);
+
+  console.log(`\n=== Scrape Runs (${runs.length}) ===\n`);
+
+  if (runs.length === 0) {
+    console.log('No scrape runs found.');
+    return;
+  }
+
+  console.log('ID    Started At                Status        Categories');
+  console.log('----  ------------------------  ------------  ----------');
+
+  runs.forEach((run) => {
+    const id = run.id.toString().padEnd(4);
+    const started = run.startedAt.padEnd(24);
+    const status = run.status.padEnd(12);
+    const categories = `${run.completedCategories}/${run.totalCategories}`;
+    console.log(`${id}  ${started}  ${status}  ${categories}`);
+  });
+}
+
+function showRun(dbPath: string, runId: number): void {
+  const run = getRunStatus(dbPath, runId);
+
+  if (!run) {
+    console.error(`Run ${runId} not found.`);
+    process.exit(1);
+  }
+
+  console.log(`\n=== Scrape Run #${run.id} ===\n`);
+  console.log(`Started:    ${run.startedAt}`);
+  if (run.completedAt) {
+    console.log(`Completed:  ${run.completedAt}`);
+  }
+  console.log(`Status:     ${run.status}`);
+  console.log(`Progress:   ${run.completedCategories}/${run.totalCategories} categories\n`);
+
+  if (run.categories.length === 0) {
+    console.log('No category data.');
+    return;
+  }
+
+  console.log('Categories:');
+  console.log('  Status       Pages  Products  Name');
+  console.log('  -----------  -----  --------  ----');
+
+  run.categories.forEach((cat) => {
+    const status = cat.status.padEnd(11);
+    const pages = (cat.lastPage?.toString() ?? '-').padStart(5);
+    const products = (cat.productCount?.toString() ?? '-').padStart(8);
+    console.log(`  ${status}  ${pages}  ${products}  ${cat.categorySlug}`);
+    if (cat.error) {
+      console.log(`               Error: ${cat.error}`);
+    }
+  });
+}
+
 function main(): void {
   const options = parseCliArgs(process.argv.slice(2));
 
@@ -285,6 +349,16 @@ function main(): void {
       break;
     case 'export':
       runExport(options);
+      break;
+    case 'runs':
+      showRuns(options.db);
+      break;
+    case 'run':
+      if (!options.args[0]) {
+        console.error('Error: run requires a run_id');
+        process.exit(1);
+      }
+      showRun(options.db, parseInt(options.args[0], 10));
       break;
     default:
       console.error(`Unknown command: ${options.command}`);

@@ -9,7 +9,9 @@ import {
   getProductsByCategory,
   getProductsOnPromo,
   searchProducts,
+  listRuns,
 } from '../../src/storage/queries';
+import { createRun, updateCategoryRun, completeRun } from '../../src/storage/repository';
 import type { ProductRecord, PriceSnapshotRecord } from '../../src/storage/types';
 
 const TEST_DB_DIR = join(__dirname, '../../.test-data');
@@ -186,6 +188,66 @@ describe('queries', () => {
       const products = searchProducts(TEST_DB_PATH, 'xyz123notfound');
 
       expect(products).toHaveLength(0);
+    });
+  });
+
+  describe('listRuns', () => {
+    it('returns empty array when no runs exist', () => {
+      const runs = listRuns(TEST_DB_PATH);
+      expect(runs).toHaveLength(0);
+    });
+
+    it('returns runs in reverse chronological order', () => {
+      createRun(TEST_DB_PATH, ['Pantry']);
+      createRun(TEST_DB_PATH, ['Bakery', 'Dairy']);
+
+      const runs = listRuns(TEST_DB_PATH);
+
+      expect(runs).toHaveLength(2);
+      expect(runs[0].id).toBe(2);
+      expect(runs[1].id).toBe(1);
+    });
+
+    it('includes run status and category counts', () => {
+      const runId = createRun(TEST_DB_PATH, ['Pantry', 'Bakery', 'Dairy']);
+      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry', {
+        status: 'completed',
+        lastPage: 5,
+        productCount: 100,
+      });
+
+      const runs = listRuns(TEST_DB_PATH);
+
+      expect(runs[0].status).toBe('in_progress');
+      expect(runs[0].totalCategories).toBe(3);
+      expect(runs[0].completedCategories).toBe(1);
+    });
+
+    it('shows completed runs with completion time', () => {
+      const runId = createRun(TEST_DB_PATH, ['Pantry']);
+      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry', {
+        status: 'completed',
+        lastPage: 5,
+        productCount: 100,
+      });
+      completeRun(TEST_DB_PATH, runId);
+
+      const runs = listRuns(TEST_DB_PATH);
+
+      expect(runs[0].status).toBe('completed');
+      expect(runs[0].completedAt).toBeDefined();
+    });
+
+    it('respects limit parameter', () => {
+      createRun(TEST_DB_PATH, ['Pantry']);
+      createRun(TEST_DB_PATH, ['Bakery']);
+      createRun(TEST_DB_PATH, ['Dairy']);
+
+      const runs = listRuns(TEST_DB_PATH, 2);
+
+      expect(runs).toHaveLength(2);
+      expect(runs[0].id).toBe(3);
+      expect(runs[1].id).toBe(2);
     });
   });
 });

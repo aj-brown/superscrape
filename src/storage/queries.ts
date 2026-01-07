@@ -1,5 +1,5 @@
 import { getDatabase } from './database';
-import type { ProductRecord, PriceSnapshotRecord } from './types';
+import type { ProductRecord, PriceSnapshotRecord, RunStatus } from './types';
 
 export interface PriceChange {
   product_id: string;
@@ -8,6 +8,15 @@ export interface PriceChange {
   from_price: number;
   to_price: number;
   delta: number;
+}
+
+export interface RunSummary {
+  id: number;
+  startedAt: string;
+  completedAt?: string;
+  status: RunStatus['status'];
+  totalCategories: number;
+  completedCategories: number;
 }
 
 export function getPriceHistory(dbPath: string, productId: string): PriceSnapshotRecord[] {
@@ -92,4 +101,40 @@ export function searchProducts(dbPath: string, query: string): ProductRecord[] {
     ORDER BY name ASC
   `);
   return stmt.all(searchPattern, searchPattern) as ProductRecord[];
+}
+
+export function listRuns(dbPath: string, limit = 20): RunSummary[] {
+  const db = getDatabase(dbPath);
+  const stmt = db.prepare(`
+    SELECT
+      sr.id,
+      sr.started_at,
+      sr.completed_at,
+      sr.status,
+      COUNT(cr.id) as total_categories,
+      SUM(CASE WHEN cr.status = 'completed' THEN 1 ELSE 0 END) as completed_categories
+    FROM scrape_runs sr
+    LEFT JOIN category_runs cr ON sr.id = cr.run_id
+    GROUP BY sr.id
+    ORDER BY sr.id DESC
+    LIMIT ?
+  `);
+
+  const rows = stmt.all(limit) as Array<{
+    id: number;
+    started_at: string;
+    completed_at: string | null;
+    status: string;
+    total_categories: number;
+    completed_categories: number;
+  }>;
+
+  return rows.map((row) => ({
+    id: row.id,
+    startedAt: row.started_at,
+    completedAt: row.completed_at ?? undefined,
+    status: row.status as RunStatus['status'],
+    totalCategories: row.total_categories,
+    completedCategories: row.completed_categories,
+  }));
 }
