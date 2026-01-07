@@ -10,6 +10,7 @@ export const ConfigSchema = z.object({
   logLevel: z.enum(['debug', 'info', 'warn', 'error']).optional(),
   categories: z.array(z.string()).optional(),
   dryRun: z.boolean().optional(),
+  concurrency: z.number().int().positive().optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
@@ -60,5 +61,6 @@ export function mergeConfigWithCli(cli: CliOptions, config: Config | undefined):
     logLevel: config.logLevel ?? cli.logLevel,
     resume: cli.resume,
     runId: cli.runId,
+    concurrency: config.concurrency ?? cli.concurrency,
   };
 }

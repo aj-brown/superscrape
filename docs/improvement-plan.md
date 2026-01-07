@@ -164,18 +164,18 @@ Scrape multiple categories concurrently with rate limiting.
 **Files**: `src/multi-scraper.ts`, `src/cli.ts`
 
 **Tasks**:
-- [ ] Add `p-limit` dependency
-- [ ] Add `--concurrency <n>` CLI flag (default: 1)
-- [ ] Refactor `MultiCategoryScraper` to use worker pool pattern
-- [ ] Create separate browser contexts per worker (not pages)
-- [ ] Share rate limiter across all workers
-- [ ] Update progress reporting for parallel execution
+- [x] Add `p-limit` dependency
+- [x] Add `--concurrency <n>` CLI flag (default: 1)
+- [x] Refactor `MultiCategoryScraper` to use worker pool pattern
+- [x] Create separate browser contexts per worker (not pages)
+- [x] Share rate limiter across all workers
+- [x] Update progress reporting for parallel execution
 
 **Verification**:
-- [ ] Unit test: concurrency limit respected (mock timing)
-- [ ] Unit test: rate limiter shared across workers
+- [x] Unit test: concurrency limit respected (mock timing)
+- [x] Unit test: rate limiter shared across workers
 - [ ] Integration test: `--concurrency 3` completes faster than `--concurrency 1`
-- [ ] Integration test: errors in one worker don't crash others
+- [x] Integration test: errors in one worker don't crash others
 - [ ] Manual: observe 3 browser windows with `--no-headless --concurrency 3`
 
 ---

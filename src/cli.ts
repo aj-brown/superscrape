@@ -13,6 +13,7 @@ export interface CliOptions {
   configPath?: string;
   resume: boolean;
   runId?: number;
+  concurrency: number;
 }
 
 /**
@@ -73,6 +74,10 @@ export function parseCliArgs(args: string[]): CliOptions {
       'run-id': {
         type: 'string',
       },
+      concurrency: {
+        type: 'string',
+        default: '1',
+      },
     },
     allowPositionals: true,
   });
@@ -101,6 +106,7 @@ export function parseCliArgs(args: string[]): CliOptions {
     configPath: values.config as string | undefined,
     resume: values.resume as boolean,
     runId,
+    concurrency: parseInt(values.concurrency as string, 10),
   };
 }
 
@@ -123,6 +129,7 @@ Options:
   --config            Path to JSON config file
   --resume            Resume last incomplete run
   --run-id <id>       Resume specific run by ID
+  --concurrency <n>   Number of parallel workers (default: 1)
   --help, -h          Show this help message
 
 Examples:
@@ -135,5 +142,6 @@ Examples:
   npm run dev -- --config config.json
   npm run dev -- --resume
   npm run dev -- --run-id 5
+  npm run dev -- --all --concurrency 3
 `);
 }

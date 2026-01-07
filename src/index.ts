@@ -120,6 +120,7 @@ async function main() {
     headless: options.headless,
     dbPath: DB_PATH,
     runId,
+    concurrency: options.concurrency,
     onProgress: (progress) => {
       const pct = Math.round(((progress.completed + progress.failed) / progress.total) * 100);
       process.stdout.write(`\r📈 Progress: ${pct}% (${progress.completed} done, ${progress.failed} failed)`);
