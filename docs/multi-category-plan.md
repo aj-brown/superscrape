@@ -80,8 +80,8 @@ interface CategoryFilter {
 **Goal:** Parse command-line arguments to configure scraping behavior.
 
 ### Tasks
-- [ ] Create `src/cli.ts` with `parseCliArgs()` and `printUsage()` functions
-- [ ] Use Node's built-in `util.parseArgs`
+- [x] Create `src/cli.ts` with `parseCliArgs()` and `printUsage()` functions
+- [x] Use Node's built-in `util.parseArgs`
 
 ### CLI Options
 ```
@@ -104,12 +104,12 @@ npm run dev -- --all --dry-run
 ### Validation & Tests
 **File:** `tests/cli.test.ts`
 
-- [ ] `parses --all flag` - Sets mode to 'all'
-- [ ] `parses multiple -c options` - Collects into categories array
-- [ ] `parses category path with >` - "A > B" parsed correctly
-- [ ] `sets default values` - pages=10, headless=true
-- [ ] `--dry-run sets dryRun flag` - Boolean flag works
-- [ ] `--help returns help flag` - Help mode detected
+- [x] `parses --all flag` - Sets mode to 'all'
+- [x] `parses multiple -c options` - Collects into categories array
+- [x] `parses category path with >` - "A > B" parsed correctly
+- [x] `sets default values` - pages=10, headless=true
+- [x] `--dry-run sets dryRun flag` - Boolean flag works
+- [x] `--help returns help flag` - Help mode detected
 
 **Manual validation:** Run `npm test` - all CLI tests pass
 
