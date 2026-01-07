@@ -10,36 +10,14 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 export function createLogger(component: string, minLevel: LogLevel = 'debug'): Logger {
   const minLevelValue = LOG_LEVELS[minLevel];
 
-  function shouldLog(level: LogLevel): boolean {
-    return LOG_LEVELS[level] >= minLevelValue;
-  }
-
-  function formatMessage(level: LogLevel, message: string): string {
-    const timestamp = new Date().toISOString();
-    return `${timestamp} [${level.toUpperCase()}] [${component}] ${message}`;
-  }
-
   function log(level: LogLevel, message: string, context?: LogContext): void {
-    if (!shouldLog(level)) {
+    if (LOG_LEVELS[level] < minLevelValue) {
       return;
     }
 
-    const formattedMessage = formatMessage(level, message);
-
-    switch (level) {
-      case 'debug':
-        console.debug(formattedMessage, context);
-        break;
-      case 'info':
-        console.info(formattedMessage, context);
-        break;
-      case 'warn':
-        console.warn(formattedMessage, context);
-        break;
-      case 'error':
-        console.error(formattedMessage, context);
-        break;
-    }
+    const timestamp = new Date().toISOString();
+    const formattedMessage = `${timestamp} [${level.toUpperCase()}] [${component}] ${message}`;
+    console[level](formattedMessage, context);
   }
 
   function startTimer(): TimerHandle {

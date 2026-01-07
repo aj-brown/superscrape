@@ -82,10 +82,6 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, config: RetryCon
     }
   }
 
-  // Should never reach here, but TypeScript needs this
-  return {
-    success: false,
-    error: lastError || new Error('Unknown error'),
-    attempts,
-  };
+  // Unreachable: all paths return from within the loop
+  throw new Error('Unexpected: retry loop exited without returning');
 }

@@ -19,22 +19,16 @@ export function createRateLimiter(config: RateLimiterConfig): RateLimiter {
     const timeSinceLastRequest = now - lastRequest;
     const minRequiredDelay = Math.max(0, config.minDelayMs - timeSinceLastRequest);
 
-    // If we're under the rate limit, just apply minimum delay
-    if (requestTimestamps.length < config.requestsPerMinute) {
-      const jitter = Math.random() * config.jitterMs;
-      return minRequiredDelay + jitter;
+    let baseDelay = minRequiredDelay;
+
+    // If at or over rate limit, also consider when oldest request expires
+    if (requestTimestamps.length >= config.requestsPerMinute) {
+      const oldestRequest = requestTimestamps[0];
+      const timeUntilOldestExpires = oldestRequest + windowMs - now;
+      baseDelay = Math.max(timeUntilOldestExpires, minRequiredDelay);
     }
 
-    // We're at or over the rate limit
-    // Calculate when the oldest request will fall out of the window
-    const oldestRequest = requestTimestamps[0];
-    const timeUntilOldestExpires = oldestRequest + windowMs - now;
-
-    // Take the maximum of rate limit delay and minimum delay
-    const baseDelay = Math.max(timeUntilOldestExpires, minRequiredDelay);
-    const jitter = Math.random() * config.jitterMs;
-
-    return baseDelay + jitter;
+    return baseDelay + Math.random() * config.jitterMs;
   }
 
   async function acquire(): Promise<void> {
