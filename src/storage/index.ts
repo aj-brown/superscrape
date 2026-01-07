@@ -6,6 +6,11 @@ export {
   getProductHistory,
   getLatestPrices,
 } from './repository';
+export {
+  productToRecord,
+  productToSnapshot,
+  productsToRecordsAndSnapshots,
+} from './converters';
 export type {
   ProductRecord,
   PriceSnapshotRecord,

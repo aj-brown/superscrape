@@ -152,16 +152,16 @@ npm test
 ## Phase 4: Integration with Scraper
 
 ### Tasks
-- [ ] Modify `src/index.ts` to:
-  - [ ] Import storage module
-  - [ ] Initialize database on startup
-  - [ ] Call `saveProducts()` after each scrape operation
-  - [ ] Keep JSON output as backup/debug option
+- [x] Modify `src/index.ts` to:
+  - [x] Import storage module
+  - [x] Initialize database on startup
+  - [x] Call `saveProducts()` after each scrape operation
+  - [x] Keep JSON output as backup/debug option
 
 ### Tests (`tests/integration/storage-integration.test.ts`)
-- [ ] Full scrape flow saves products to database
-- [ ] Multiple scrapes create price history
-- [ ] Database persists between runs
+- [x] Full scrape flow saves products to database
+- [x] Multiple scrapes create price history
+- [x] Database persists between runs
 
 ### Verification
 ```bash

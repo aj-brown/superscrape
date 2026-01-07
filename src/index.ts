@@ -1,8 +1,27 @@
 import { NewWorldScraper } from './scraper';
 import * as fs from 'fs';
+import * as path from 'path';
+import {
+  initDatabase,
+  saveProducts,
+  productsToRecordsAndSnapshots,
+} from './storage';
+
+const DATA_DIR = './data';
+const DB_PATH = path.join(DATA_DIR, 'prices.db');
 
 async function main() {
   console.log('🛒 New World Price Scraper\n');
+
+  // Ensure data directory exists
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+
+  // Initialize database
+  console.log('💾 Initializing database...');
+  initDatabase(DB_PATH);
+  console.log(`✅ Database ready at ${DB_PATH}\n`);
 
   const scraper = new NewWorldScraper({
     headless: false, // Set to true for production
@@ -58,16 +77,26 @@ async function main() {
       );
     });
 
-    // Combine results and save to file
+    // Combine all products for database storage
+    const allProducts = [...fruitProducts, ...milkProducts];
+    const scrapeDate = new Date().toISOString();
+
+    // Save to database
+    console.log('\n💾 Saving products to database...');
+    const { records, snapshots } = productsToRecordsAndSnapshots(allProducts, scrapeDate);
+    saveProducts(DB_PATH, records, snapshots);
+    console.log(`✅ Saved ${allProducts.length} products to database`);
+
+    // Also save JSON output as backup/debug option
     const results = {
-      scrapeDate: new Date().toISOString(),
+      scrapeDate,
       categories: categories.map((c) => ({ id: c.id, name: c.name })),
       fruitProducts,
       milkProducts,
     };
 
     fs.writeFileSync('scrape-results.json', JSON.stringify(results, null, 2));
-    console.log('\n💾 Results saved to scrape-results.json');
+    console.log('💾 Results also saved to scrape-results.json (backup)');
 
     // Print summary
     console.log('\n=== SCRAPE SUMMARY ===');
