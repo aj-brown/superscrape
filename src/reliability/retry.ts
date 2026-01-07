@@ -1,5 +1,9 @@
 import type { RetryConfig, RetryResult } from './types';
 
+interface ErrorWithStatusCode extends Error {
+  statusCode?: number;
+}
+
 export function isRetryableError(error: Error): boolean {
   // Check for validation errors (not retryable)
   if (error.name === 'ValidationError' || error.name === 'AuthenticationError') {
@@ -7,7 +11,7 @@ export function isRetryableError(error: Error): boolean {
   }
 
   // Check for 4xx status codes (client errors - not retryable)
-  const statusCode = (error as any).statusCode;
+  const statusCode = (error as ErrorWithStatusCode).statusCode;
   if (statusCode && statusCode >= 400 && statusCode < 500) {
     return false;
   }

@@ -1,16 +1,12 @@
 import { Camoufox } from 'camoufox';
-import type { Browser, BrowserContext, Cookie, Page, Request, Response } from 'playwright-core';
+import type { Browser, BrowserContext, Cookie, Page, Response } from 'playwright-core';
 import {
-  buildProductSearchPayload,
   parseProductFromApi,
   extractStoreIdFromCookies,
   type Product,
   type CategoryInfo,
-  type SearchQuery,
 } from './utils';
 import { createReliabilityWrapper, type ReliabilityConfig } from './reliability';
-
-const API_BASE = 'https://api-prod.newworld.co.nz/v1/edge';
 
 export interface ScraperConfig {
   headless?: boolean;
