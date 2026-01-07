@@ -90,23 +90,23 @@ npm test -- tests/storage/database.test.ts
 ## Phase 2: Repository Module
 
 ### Tasks
-- [ ] Create `src/storage/repository.ts` with:
-  - [ ] `upsertProduct(product)` - Insert or update product master data
-  - [ ] `insertPriceSnapshot(productId, snapshot)` - Add price record
-  - [ ] `saveProducts(products[], scrapedAt)` - Batch save (main entry point)
-  - [ ] `getProductHistory(productId)` - Get price history for a product
-  - [ ] `getLatestPrices()` - Get most recent price for all products
+- [x] Create `src/storage/repository.ts` with:
+  - [x] `upsertProduct(product)` - Insert or update product master data
+  - [x] `insertPriceSnapshot(productId, snapshot)` - Add price record
+  - [x] `saveProducts(products[], scrapedAt)` - Batch save (main entry point)
+  - [x] `getProductHistory(productId)` - Get price history for a product
+  - [x] `getLatestPrices()` - Get most recent price for all products
 
 ### Tests (`tests/storage/repository.test.ts`)
-- [ ] upsertProduct creates new product
-- [ ] upsertProduct updates existing product's last_seen
-- [ ] upsertProduct preserves first_seen on update
-- [ ] insertPriceSnapshot creates snapshot record
-- [ ] insertPriceSnapshot enforces unique constraint (product_id, scraped_at)
-- [ ] saveProducts handles batch of products correctly
-- [ ] saveProducts updates products and creates snapshots atomically
-- [ ] getProductHistory returns chronological price history
-- [ ] getLatestPrices returns most recent snapshot per product
+- [x] upsertProduct creates new product
+- [x] upsertProduct updates existing product's last_seen
+- [x] upsertProduct preserves first_seen on update
+- [x] insertPriceSnapshot creates snapshot record
+- [x] insertPriceSnapshot enforces unique constraint (product_id, scraped_at)
+- [x] saveProducts handles batch of products correctly
+- [x] saveProducts updates products and creates snapshots atomically
+- [x] getProductHistory returns chronological price history
+- [x] getLatestPrices returns most recent snapshot per product
 
 ### Verification
 ```bash
