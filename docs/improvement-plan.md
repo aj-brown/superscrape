@@ -87,16 +87,16 @@ Support JSON config files for repeatable pipeline runs.
 **Files**: `src/config.ts` (new), `src/cli.ts`
 
 **Tasks**:
-- [ ] Create `src/config.ts` with config schema (using Zod)
-- [ ] Add `--config <path>` CLI flag
-- [ ] Implement config file loading and validation
-- [ ] Merge config with CLI args (CLI takes precedence)
-- [ ] Add example `config.example.json` to project root
+- [x] Create `src/config.ts` with config schema (using Zod)
+- [x] Add `--config <path>` CLI flag
+- [x] Implement config file loading and validation
+- [x] Merge config with CLI args (CLI takes precedence)
+- [x] Add example `config.example.json` to project root
 
 **Verification**:
-- [ ] Unit test: config file loads and validates correctly
-- [ ] Unit test: CLI args override config values
-- [ ] Unit test: invalid config file throws descriptive error
+- [x] Unit test: config file loads and validates correctly
+- [x] Unit test: CLI args override config values
+- [x] Unit test: invalid config file throws descriptive error
 - [ ] Integration test: full scrape with config file only
 - [ ] Manual: run with `--config config.example.json`
 

@@ -1,0 +1,7 @@
+{
+  "maxPages": 5,
+  "headless": true,
+  "logFormat": "text",
+  "logLevel": "info",
+  "categories": ["Pantry", "Bakery"]
+}

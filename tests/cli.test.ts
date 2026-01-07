@@ -89,4 +89,16 @@ describe('parseCliArgs', () => {
 
     expect(result.logLevel).toBe('debug');
   });
+
+  it('--config sets configPath', () => {
+    const result = parseCliArgs(['--config', 'my-config.json']);
+
+    expect(result.configPath).toBe('my-config.json');
+  });
+
+  it('configPath is undefined by default', () => {
+    const result = parseCliArgs([]);
+
+    expect(result.configPath).toBeUndefined();
+  });
 });

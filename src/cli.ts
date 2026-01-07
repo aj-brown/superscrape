@@ -10,6 +10,7 @@ export interface CliOptions {
   help: boolean;
   logFormat: LogFormat;
   logLevel: LogLevel;
+  configPath?: string;
 }
 
 /**
@@ -60,6 +61,9 @@ export function parseCliArgs(args: string[]): CliOptions {
         type: 'string',
         default: 'info',
       },
+      config: {
+        type: 'string',
+      },
     },
     allowPositionals: true,
   });
@@ -82,6 +86,7 @@ export function parseCliArgs(args: string[]): CliOptions {
     help: values.help as boolean,
     logFormat: values['log-format'] as LogFormat,
     logLevel: values['log-level'] as LogLevel,
+    configPath: values.config as string | undefined,
   };
 }
 
@@ -101,6 +106,7 @@ Options:
   --dry-run           List categories without scraping
   --log-format        Log format: text or json (default: text)
   --log-level         Log level: debug, info, warn, error (default: info)
+  --config            Path to JSON config file
   --help, -h          Show this help message
 
 Examples:
@@ -110,5 +116,6 @@ Examples:
   npm run dev -- --all --dry-run
   npm run dev -- -c "Pantry" --pages 5
   npm run dev -- --log-format json --log-level debug
+  npm run dev -- --config config.json
 `);
 }
