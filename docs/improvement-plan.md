@@ -62,16 +62,16 @@ Validate scraped data before database insertion.
 **Files**: `src/schemas.ts` (new), `src/utils.ts`, `src/storage/repository.ts`
 
 **Tasks**:
-- [ ] Add `zod` dependency
-- [ ] Create `src/schemas.ts` with Product and PriceSnapshot schemas
+- [x] Add `zod` dependency
+- [x] Create `src/schemas.ts` with Product and PriceSnapshot schemas
 - [ ] Update `parseProductFromApi()` to use Zod parsing
 - [ ] Add validation stats to scrape results (valid/invalid counts)
 - [ ] Log and skip invalid products (don't crash pipeline)
 
 **Verification**:
-- [ ] Unit test: valid product passes schema
-- [ ] Unit test: missing required field throws ZodError
-- [ ] Unit test: invalid price (negative, NaN) rejected
+- [x] Unit test: valid product passes schema
+- [x] Unit test: missing required field throws ZodError
+- [x] Unit test: invalid price (negative, NaN) rejected
 - [ ] Integration test: scraper continues when invalid product encountered
 - [ ] Manual: inject malformed product, verify logged and skipped
 
