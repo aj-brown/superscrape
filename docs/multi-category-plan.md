@@ -51,9 +51,9 @@ interface FlatCategory {
 **Goal:** Filter categories based on user selection (all vs specific).
 
 ### Tasks
-- [ ] Add `CategoryFilter` type to `src/categories/types.ts`
-- [ ] Create `src/categories/selector.ts` with `selectCategories()` function
-- [ ] Update `src/categories/index.ts` exports
+- [x] Add `CategoryFilter` type to `src/categories/types.ts`
+- [x] Create `src/categories/selector.ts` with `selectCategories()` function
+- [x] Update `src/categories/index.ts` exports
 
 ### Key Types
 ```typescript
@@ -66,10 +66,10 @@ interface CategoryFilter {
 ### Validation & Tests
 **File:** `tests/categories/selector.test.ts`
 
-- [ ] `mode=all returns all categories` - No filtering applied
-- [ ] `mode=specific filters to matching category0` - Only specified top-level categories
-- [ ] `mode=specific with path filters to exact match` - "Fruit & Vegetables > Fruit" matches exactly
-- [ ] `returns empty array for no matches` - Invalid category returns []
+- [x] `mode=all returns all categories` - No filtering applied
+- [x] `mode=specific filters to matching category0` - Only specified top-level categories
+- [x] `mode=specific with path filters to exact match` - "Fruit & Vegetables > Fruit" matches exactly
+- [x] `returns empty array for no matches` - Invalid category returns []
 
 **Manual validation:** Run `npm test` - all selector tests pass
 
