@@ -65,4 +65,28 @@ describe('parseCliArgs', () => {
 
     expect(result.headless).toBe(false);
   });
+
+  it('--log-format sets logFormat (default: text)', () => {
+    const result = parseCliArgs([]);
+
+    expect(result.logFormat).toBe('text');
+  });
+
+  it('--log-format json sets logFormat to json', () => {
+    const result = parseCliArgs(['--log-format', 'json']);
+
+    expect(result.logFormat).toBe('json');
+  });
+
+  it('--log-level sets logLevel (default: info)', () => {
+    const result = parseCliArgs([]);
+
+    expect(result.logLevel).toBe('info');
+  });
+
+  it('--log-level debug sets logLevel to debug', () => {
+    const result = parseCliArgs(['--log-level', 'debug']);
+
+    expect(result.logLevel).toBe('debug');
+  });
 });

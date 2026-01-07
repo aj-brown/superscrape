@@ -33,6 +33,7 @@ export interface ReliabilityConfig {
 
 // Logger types
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogFormat = 'json' | 'text';
 
 export interface LogContext {
   [key: string]: unknown;

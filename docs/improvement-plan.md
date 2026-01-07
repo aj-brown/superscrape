@@ -38,15 +38,15 @@ Upgrade logging for pipeline observability.
 **Files**: `src/reliability/logger.ts`, `src/cli.ts`
 
 **Tasks**:
-- [ ] Add `LogFormat` type (`json` | `text`)
-- [ ] Update logger to support JSON output (newline-delimited)
-- [ ] Add `--log-format` CLI flag (default: `text`)
-- [ ] Add `--log-level` CLI flag (default: `info`)
-- [ ] Ensure logs go to stderr (keep stdout clean for data)
+- [x] Add `LogFormat` type (`json` | `text`)
+- [x] Update logger to support JSON output (newline-delimited)
+- [x] Add `--log-format` CLI flag (default: `text`)
+- [x] Add `--log-level` CLI flag (default: `info`)
+- [x] Ensure logs go to stderr (keep stdout clean for data)
 
 **Verification**:
-- [ ] Unit test: JSON format outputs valid JSON per line
-- [ ] Unit test: log level filtering works correctly
+- [x] Unit test: JSON format outputs valid JSON per line
+- [x] Unit test: log level filtering works correctly
 - [ ] Integration test: `--log-format json` produces parseable output
 - [ ] Manual: pipe JSON logs to `jq` to verify structure
 

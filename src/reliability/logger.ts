@@ -1,4 +1,4 @@
-import type { Logger, LogLevel, LogContext, TimerHandle } from './types';
+import type { Logger, LogLevel, LogFormat, LogContext, TimerHandle } from './types';
 
 const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
@@ -7,17 +7,42 @@ const LOG_LEVELS: Record<LogLevel, number> = {
   error: 3,
 };
 
-export function createLogger(component: string, minLevel: LogLevel = 'debug'): Logger {
+export function createLogger(
+  component: string,
+  minLevel: LogLevel = 'debug',
+  format: LogFormat = 'text'
+): Logger {
   const minLevelValue = LOG_LEVELS[minLevel];
+
+  function logText(level: LogLevel, message: string, context?: LogContext): void {
+    const timestamp = new Date().toISOString();
+    const formattedMessage = `${timestamp} [${level.toUpperCase()}] [${component}] ${message}`;
+    console[level](formattedMessage, context);
+  }
+
+  function logJson(level: LogLevel, message: string, context?: LogContext): void {
+    const logEntry: Record<string, unknown> = {
+      timestamp: new Date().toISOString(),
+      level,
+      component,
+      message,
+    };
+    if (context !== undefined) {
+      logEntry.context = context;
+    }
+    process.stderr.write(JSON.stringify(logEntry) + '\n');
+  }
 
   function log(level: LogLevel, message: string, context?: LogContext): void {
     if (LOG_LEVELS[level] < minLevelValue) {
       return;
     }
 
-    const timestamp = new Date().toISOString();
-    const formattedMessage = `${timestamp} [${level.toUpperCase()}] [${component}] ${message}`;
-    console[level](formattedMessage, context);
+    if (format === 'json') {
+      logJson(level, message, context);
+    } else {
+      logText(level, message, context);
+    }
   }
 
   function startTimer(): TimerHandle {
