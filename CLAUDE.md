@@ -38,13 +38,68 @@ npm run test:ui
 - **Vitest** - Test framework
 - **tsx** - For running TypeScript directly during development
 
+## CLI Arguments
+
+```bash
+npm run dev -- [options]
+```
+
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--all` | `-a` | Scrape all categories | Yes (default behavior) |
+| `--category` | `-c` | Scrape specific category (repeatable) | - |
+| `--pages` | `-p` | Max pages per category | 10 |
+| `--headless` | - | Run browser in headless mode | true |
+| `--no-headless` | - | Run with visible browser | - |
+| `--dry-run` | - | List categories without scraping | false |
+| `--help` | `-h` | Show usage information | - |
+
+## CLI Examples
+
+```bash
+# List all available categories (no scraping)
+npm run dev -- --dry-run
+
+# Scrape all categories (1 page each)
+npm run dev -- --all --pages 1
+
+# Scrape specific top-level category
+npm run dev -- -c "Pantry" --pages 2
+
+# Scrape multiple categories
+npm run dev -- -c "Pantry" -c "Bakery" --pages 1
+
+# Scrape specific subcategory using path syntax
+npm run dev -- -c "Fruit & Vegetables > Fruit" --pages 3
+
+# Run with visible browser for debugging
+npm run dev -- -c "Pantry" --no-headless --pages 1
+
+# Show help
+npm run dev -- --help
+```
+
 ## Project Structure
 
 ```
 src/
-├── index.ts              # Entry point
+├── index.ts              # Entry point with CLI integration
+├── cli.ts                # CLI argument parsing
 ├── scraper.ts            # Main scraper with reliability wrapper
+├── multi-scraper.ts      # Multi-category orchestrator
 ├── utils.ts              # Utility functions
+├── categories/           # Category handling module
+│   ├── index.ts          # Re-exports
+│   ├── types.ts          # CategoryNode, FlatCategory, CategoryFilter
+│   ├── parser.ts         # Parse categories.json, exclude Featured
+│   └── selector.ts       # Filter categories by mode
+├── storage/              # SQLite storage module
+│   ├── index.ts          # Re-exports
+│   ├── database.ts       # Database initialization
+│   ├── repository.ts     # CRUD operations
+│   ├── converters.ts     # Product to record conversion
+│   ├── queries.ts        # Price tracking queries
+│   └── types.ts          # Database record types
 └── reliability/          # Reliability module
     ├── index.ts          # Exports withReliability wrapper
     ├── types.ts          # Type definitions
@@ -54,13 +109,10 @@ src/
     └── logger.ts         # Structured logging
 
 tests/
-├── reliability/          # Unit tests for reliability components
-│   ├── retry.test.ts
-│   ├── circuit-breaker.test.ts
-│   ├── rate-limiter.test.ts
-│   └── logger.test.ts
+├── categories/           # Category module tests
+├── reliability/          # Reliability component tests
+├── storage/              # Storage module tests
 └── integration/          # Integration tests
-    └── scraper-reliability.test.ts
 ```
 
 ## Architecture Notes
