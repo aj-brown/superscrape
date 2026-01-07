@@ -4,11 +4,11 @@
 Add support for scraping multiple categories (all or a selection), excluding the "Featured" category by default. Scraping at subcategory level (level 1) with pagination.
 
 ## Requirements
-- [ ] Scrape all categories OR a limited selection
-- [ ] Exclude "Featured" category from all scrapes
-- [ ] Scrape at level 1 (subcategory) - e.g., "Fruit & Vegetables" > "Fruit"
-- [ ] Maintain existing reliability patterns (rate limiting, retry, circuit breaker)
-- [ ] Follow TDD approach
+- [x] Scrape all categories OR a limited selection
+- [x] Exclude "Featured" category from all scrapes
+- [x] Scrape at level 1 (subcategory) - e.g., "Fruit & Vegetables" > "Fruit"
+- [x] Maintain existing reliability patterns (rate limiting, retry, circuit breaker)
+- [x] Follow TDD approach
 
 ---
 
@@ -172,9 +172,9 @@ class MultiCategoryScraper {
 **Goal:** Wire everything together in `src/index.ts`.
 
 ### Tasks
-- [ ] Update `src/index.ts` to use CLI, parser, selector, and multi-scraper
-- [ ] Add dry-run mode to list categories without scraping
-- [ ] Add summary output with success/failure counts
+- [x] Update `src/index.ts` to use CLI, parser, selector, and multi-scraper
+- [x] Add dry-run mode to list categories without scraping
+- [x] Add summary output with success/failure counts
 
 ### Updated Flow
 ```
@@ -191,11 +191,11 @@ class MultiCategoryScraper {
 ### Validation & Tests
 **File:** `tests/integration/multi-category.test.ts`
 
-- [ ] `dry-run lists categories without scraping` - No browser launched
-- [ ] `scrapes single category end-to-end` - Full flow with 1 category
+- [x] `dry-run lists categories without scraping` - No browser launched
+- [x] `scrapes single category end-to-end` - Full flow with 1 category
 
 ### Manual Validation
-- [ ] `npm run dev -- --dry-run` - Lists ~80 categories (no Featured)
+- [x] `npm run dev -- --dry-run` - Lists 120 categories (no Featured)
 - [ ] `npm run dev -- -c "Pantry" --pages 1` - Scrapes Pantry subcategories
 - [ ] `npm run dev -- --all --pages 1` - Scrapes all categories
 

@@ -1,17 +1,57 @@
-import { NewWorldScraper } from './scraper';
 import * as fs from 'fs';
 import * as path from 'path';
-import {
-  initDatabase,
-  saveProducts,
-  productsToRecordsAndSnapshots,
-} from './storage';
+import { parseCliArgs, printUsage } from './cli';
+import { parseCategories, selectCategories, type CategoryNode } from './categories';
+import { MultiCategoryScraper } from './multi-scraper';
+import { initDatabase } from './storage';
 
 const DATA_DIR = './data';
 const DB_PATH = path.join(DATA_DIR, 'prices.db');
+const CATEGORIES_PATH = './docs/categories.json';
 
 async function main() {
-  console.log('🛒 New World Price Scraper\n');
+  // Parse CLI arguments
+  const args = process.argv.slice(2);
+  const options = parseCliArgs(args);
+
+  if (options.help) {
+    printUsage();
+    return;
+  }
+
+  console.log('🛒 New World Multi-Category Scraper\n');
+
+  // Load and parse categories
+  console.log('📂 Loading categories...');
+  if (!fs.existsSync(CATEGORIES_PATH)) {
+    console.error(`❌ Categories file not found: ${CATEGORIES_PATH}`);
+    process.exit(1);
+  }
+
+  const rawCategories = JSON.parse(fs.readFileSync(CATEGORIES_PATH, 'utf-8')) as CategoryNode[];
+  const allCategories = parseCategories(rawCategories);
+  console.log(`📊 Parsed ${allCategories.length} subcategories (excluding Featured)`);
+
+  // Select categories based on filter
+  const selectedCategories = selectCategories(allCategories, options.filter);
+
+  if (selectedCategories.length === 0) {
+    console.error('❌ No categories matched your filter');
+    process.exit(1);
+  }
+
+  console.log(`🎯 Selected ${selectedCategories.length} categories to scrape\n`);
+
+  // Dry run mode - just list categories
+  if (options.dryRun) {
+    console.log('📋 Categories to scrape (dry-run mode):\n');
+    for (const cat of selectedCategories) {
+      console.log(`  - ${cat.category0} > ${cat.category1}`);
+    }
+    console.log(`\nTotal: ${selectedCategories.length} categories`);
+    console.log('\n(Use without --dry-run to start scraping)');
+    return;
+  }
 
   // Ensure data directory exists
   if (!fs.existsSync(DATA_DIR)) {
@@ -23,97 +63,40 @@ async function main() {
   initDatabase(DB_PATH);
   console.log(`✅ Database ready at ${DB_PATH}\n`);
 
-  const scraper = new NewWorldScraper({
-    headless: false, // Set to true for production
+  // Run multi-category scraper
+  const scraper = new MultiCategoryScraper({
+    categories: selectedCategories,
+    maxPages: options.maxPages,
+    headless: options.headless,
+    dbPath: DB_PATH,
+    onProgress: (progress) => {
+      const pct = Math.round(((progress.completed + progress.failed) / progress.total) * 100);
+      process.stdout.write(`\r📈 Progress: ${pct}% (${progress.completed} done, ${progress.failed} failed)`);
+    },
   });
 
-  try {
-    // Initialize the scraper (establishes session)
-    await scraper.initialize();
+  const result = await scraper.run();
 
-    // Fetch categories
-    console.log('\n📂 Fetching store categories...');
-    const categories = await scraper.getCategories();
-    console.log(`Found ${categories.length} top-level categories`);
+  // Print summary
+  console.log('\n\n=== SCRAPE SUMMARY ===');
+  console.log(`Total categories: ${result.total}`);
+  console.log(`Completed: ${result.completed}`);
+  console.log(`Failed: ${result.failed}`);
 
-    // Log category names
-    categories.slice(0, 10).forEach((cat) => {
-      console.log(`  - ${cat.name || cat.id}`);
-    });
+  const totalProducts = result.results.reduce((sum, r) => sum + r.productCount, 0);
+  console.log(`Total products scraped: ${totalProducts}`);
 
-    // Scrape a specific category (Fruit & Vegetables > Fruit)
-    console.log('\n🍎 Scraping Fruit & Vegetables > Fruit category...');
-    const fruitProducts = await scraper.scrapeCategory(
-      'Fruit & Vegetables',
-      'Fruit',
-      1 // Limit to 1 page for development
-    );
-
-    console.log(`\n✅ Scraped ${fruitProducts.length} fruit products`);
-
-    // Display sample products
-    console.log('\n📋 Sample products:');
-    fruitProducts.slice(0, 10).forEach((product) => {
-      console.log(
-        `  - ${product.name} (${product.displayName}): $${product.price.toFixed(2)}${
-          product.pricePerUnit
-            ? ` ($${product.pricePerUnit.toFixed(2)}/${product.unitOfMeasure})`
-            : ''
-        }`
-      );
-    });
-
-    // Search for milk products
-    console.log('\n🥛 Searching for "milk"...');
-    const milkProducts = await scraper.search('milk', 1);
-
-    console.log(`\n✅ Found ${milkProducts.length} milk products`);
-
-    // Display sample milk products
-    console.log('\n📋 Sample milk products:');
-    milkProducts.slice(0, 10).forEach((product) => {
-      console.log(
-        `  - ${product.brand ? product.brand + ' ' : ''}${product.name} (${product.displayName}): $${product.price.toFixed(2)}`
-      );
-    });
-
-    // Combine all products for database storage
-    const allProducts = [...fruitProducts, ...milkProducts];
-    const scrapeDate = new Date().toISOString();
-
-    // Save to database
-    console.log('\n💾 Saving products to database...');
-    const { records, snapshots } = productsToRecordsAndSnapshots(allProducts, scrapeDate);
-    saveProducts(DB_PATH, records, snapshots);
-    console.log(`✅ Saved ${allProducts.length} products to database`);
-
-    // Also save JSON output as backup/debug option
-    const results = {
-      scrapeDate,
-      categories: categories.map((c) => ({ id: c.id, name: c.name })),
-      fruitProducts,
-      milkProducts,
-    };
-
-    fs.writeFileSync('scrape-results.json', JSON.stringify(results, null, 2));
-    console.log('💾 Results also saved to scrape-results.json (backup)');
-
-    // Print summary
-    console.log('\n=== SCRAPE SUMMARY ===');
-    console.log(`Total fruit products: ${fruitProducts.length}`);
-    console.log(`Total milk products: ${milkProducts.length}`);
-    console.log(
-      `Average fruit price: $${(fruitProducts.reduce((sum, p) => sum + p.price, 0) / fruitProducts.length).toFixed(2)}`
-    );
-    console.log(
-      `Average milk price: $${(milkProducts.reduce((sum, p) => sum + p.price, 0) / milkProducts.length).toFixed(2)}`
-    );
-  } catch (error) {
-    console.error('❌ Error:', error);
-    throw error;
-  } finally {
-    await scraper.close();
+  if (result.failed > 0) {
+    console.log('\n❌ Failed categories:');
+    for (const r of result.results.filter((r) => !r.success)) {
+      console.log(`  - ${r.category}: ${r.error}`);
+    }
   }
+
+  console.log('\n✅ Scraping complete!');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error('❌ Fatal error:', error);
+  process.exit(1);
+});
