@@ -17,6 +17,7 @@
   "license": "ISC",
   "description": "A web scraping project using Camoufox",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.0.3",
     "@vitest/ui": "^4.0.16",
     "tsx": "^4.21.0",
@@ -24,6 +25,7 @@
     "vitest": "^4.0.16"
   },
   "dependencies": {
+    "better-sqlite3": "^12.5.0",
     "camoufox": "^0.1.19"
   }
 }
