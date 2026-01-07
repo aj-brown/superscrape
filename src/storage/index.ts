@@ -1,4 +1,4 @@
-export { initDatabase, getDatabase, closeDatabase } from './database';
+export { initDatabase, getDatabase, closeDatabase, checkpoint } from './database';
 export {
   upsertProduct,
   insertPriceSnapshot,
@@ -24,4 +24,5 @@ export type {
   PriceSnapshotRecord,
   StorageConfig,
   DatabaseConnection,
+  CheckpointResult,
 } from './types';

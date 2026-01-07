@@ -1,7 +1,12 @@
 import Database from 'better-sqlite3';
-import type { DatabaseConnection } from './types';
+import type { DatabaseConnection, CheckpointResult } from './types';
 
 const connections = new Map<string, DatabaseConnection>();
+
+function enableWalMode(db: DatabaseConnection): void {
+  db.exec('PRAGMA journal_mode=WAL');
+  db.exec('PRAGMA synchronous=NORMAL');
+}
 
 const SCHEMA = `
 -- Master product data (upserted on each scrape)
@@ -49,6 +54,7 @@ export function initDatabase(path: string): DatabaseConnection {
   }
 
   const db = new Database(path);
+  enableWalMode(db);
   db.exec(SCHEMA);
   connections.set(path, db);
   return db;
@@ -68,4 +74,17 @@ export function closeDatabase(path: string): void {
     db.close();
     connections.delete(path);
   }
+}
+
+export function checkpoint(path: string): CheckpointResult {
+  const db = getDatabase(path);
+  const result = db.prepare('PRAGMA wal_checkpoint(PASSIVE)').get() as {
+    busy: number;
+    log: number;
+    checkpointed: number;
+  };
+  return {
+    walPages: result.log,
+    movedPages: result.checkpointed,
+  };
 }

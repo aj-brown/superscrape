@@ -36,3 +36,8 @@ export interface StorageConfig {
 }
 
 export type DatabaseConnection = Database;
+
+export interface CheckpointResult {
+  walPages: number;
+  movedPages: number;
+}
