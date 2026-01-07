@@ -8,6 +8,7 @@ import {
   type CategoryInfo,
   type SearchQuery,
 } from './utils';
+import { createReliabilityWrapper, type ReliabilityConfig } from './reliability';
 
 const API_BASE = 'https://api-prod.newworld.co.nz/v1/edge';
 
@@ -15,6 +16,7 @@ export interface ScraperConfig {
   headless?: boolean;
   storeId?: string;
   proxy?: string;
+  reliability?: Partial<ReliabilityConfig>;
 }
 
 export interface ScraperResult {
@@ -36,13 +38,16 @@ export class NewWorldScraper {
   private config: ScraperConfig;
   private page: Page | null = null;
   private capturedResponses: Map<string, CapturedResponse> = new Map();
+  private reliability: ReturnType<typeof createReliabilityWrapper>;
 
   constructor(config: ScraperConfig = {}) {
     this.config = {
       headless: config.headless ?? true,
       storeId: config.storeId,
       proxy: config.proxy,
+      reliability: config.reliability,
     };
+    this.reliability = createReliabilityWrapper(this.config.reliability);
   }
 
   async initialize(): Promise<void> {
@@ -83,9 +88,6 @@ export class NewWorldScraper {
       timeout: 60000,
     });
 
-    // Wait for page to fully load and cookies to be set
-    await this.page.waitForTimeout(3000);
-
     // Get cookies
     const context = this.page.context();
     this.cookies = await context.cookies();
@@ -110,12 +112,14 @@ export class NewWorldScraper {
       throw new Error('Scraper not initialized. Call initialize() first.');
     }
 
-    this.capturedResponses.clear();
-    await this.page.goto(url, {
-      waitUntil: 'networkidle',
-      timeout: 60000,
+    await this.reliability.execute(async () => {
+      this.capturedResponses.clear();
+      await this.page!.goto(url, {
+        waitUntil: 'networkidle',
+        timeout: 60000,
+      });
+      // Note: Removed waitForTimeout as rate limiter handles delays
     });
-    await this.page.waitForTimeout(2000);
   }
 
   async getCategories(): Promise<CategoryInfo[]> {

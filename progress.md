@@ -26,6 +26,12 @@
 - ✅ All tests passing (16/16)
 - ✅ Committed: e022113
 
-## Phase 4: Circuit Breaker (PENDING)
+## ✅ Phase 4: Circuit Breaker (COMPLETE)
+- ✅ Wrote tests/reliability/circuit-breaker.test.ts (15 tests)
+- ✅ Implemented src/reliability/circuit-breaker.ts
+- ✅ Three-state machine (CLOSED/OPEN/HALF_OPEN)
+- ✅ Automatic probing after reset timeout
+- ✅ All tests passing (15/15)
+- ✅ Committed: 486af76
 
 ## Phase 5: Integration (PENDING)
