@@ -3,6 +3,7 @@ import type { Browser, BrowserContext, Cookie, Page, Response } from 'playwright
 import {
   parseProductFromApi,
   extractStoreIdFromCookies,
+  toCategorySlug,
   type Product,
   type CategoryInfo,
 } from './utils';
@@ -154,8 +155,8 @@ export class NewWorldScraper {
     for (let page = 0; page < maxPages; page++) {
       // Build the category URL
       const categorySlug = category1
-        ? `${category0.toLowerCase().replace(/ & /g, '-and-').replace(/ /g, '-')}/${category1.toLowerCase().replace(/ /g, '-')}`
-        : category0.toLowerCase().replace(/ & /g, '-and-').replace(/ /g, '-');
+        ? `${toCategorySlug(category0)}/${toCategorySlug(category1)}`
+        : toCategorySlug(category0);
 
       const url = `https://www.newworld.co.nz/shop/category/${categorySlug}?pg=${page + 1}`;
       console.log(`🔍 Navigating to: ${url}`);

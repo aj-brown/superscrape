@@ -5,14 +5,14 @@ import { parseCategories, selectCategories, type CategoryNode, type FlatCategory
 import { MultiCategoryScraper } from './multi-scraper';
 import { initDatabase, getIncompleteRun, getRunStatus } from './storage';
 
-const DATA_DIR = './data';
-const DB_PATH = path.join(DATA_DIR, 'prices.db');
 const CATEGORIES_PATH = './docs/categories.json';
 
 async function main() {
   // Parse CLI arguments
   const args = process.argv.slice(2);
   const options = parseCliArgs(args);
+  const dbPath = options.dbPath;
+  const dataDir = path.dirname(dbPath);
 
   if (options.help) {
     printUsage();
@@ -54,14 +54,14 @@ async function main() {
   }
 
   // Ensure data directory exists
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
   }
 
   // Initialize database
   console.log('💾 Initializing database...');
-  initDatabase(DB_PATH);
-  console.log(`✅ Database ready at ${DB_PATH}\n`);
+  initDatabase(dbPath);
+  console.log(`✅ Database ready at ${dbPath}\n`);
 
   // Handle resume mode
   let runId: number | undefined;
@@ -72,7 +72,7 @@ async function main() {
 
     if (options.runId) {
       // Resume specific run
-      const runStatus = getRunStatus(DB_PATH, options.runId);
+      const runStatus = getRunStatus(dbPath, options.runId);
       if (!runStatus) {
         console.error(`❌ Run ${options.runId} not found`);
         process.exit(1);
@@ -90,7 +90,7 @@ async function main() {
       };
     } else {
       // Resume last incomplete run
-      incompleteRun = getIncompleteRun(DB_PATH);
+      incompleteRun = getIncompleteRun(dbPath);
     }
 
     if (!incompleteRun) {
@@ -118,7 +118,7 @@ async function main() {
     categories: categoriesToScrape,
     maxPages: options.maxPages,
     headless: options.headless,
-    dbPath: DB_PATH,
+    dbPath,
     runId,
     concurrency: options.concurrency,
     onProgress: (progress) => {

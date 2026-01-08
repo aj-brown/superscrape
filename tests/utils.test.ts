@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseProductFromApi } from '../src/utils';
+import { parseProductFromApi, toCategorySlug } from '../src/utils';
 
 describe('parseProductFromApi', () => {
   const makeRawProduct = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
@@ -130,5 +130,36 @@ describe('parseProductFromApi', () => {
     expect(product.subcategory).toBe('Dairy');
     expect(product.availability).toEqual(['IN_STORE', 'ONLINE']);
     expect(product.origin).toBe('Made in NZ');
+  });
+});
+
+describe('toCategorySlug', () => {
+  it('converts spaces to hyphens', () => {
+    expect(toCategorySlug('Breakfast Cereals')).toBe('breakfast-cereals');
+  });
+
+  it('converts " & " to "-and-"', () => {
+    expect(toCategorySlug('Sliced & Packaged Bread')).toBe('sliced-and-packaged-bread');
+    expect(toCategorySlug('Biscuits & Crackers')).toBe('biscuits-and-crackers');
+  });
+
+  it('removes commas', () => {
+    expect(toCategorySlug('Chips, Nuts & Snacks')).toBe('chips-nuts-and-snacks');
+    expect(toCategorySlug('Jams, Honey & Spreads')).toBe('jams-honey-and-spreads');
+  });
+
+  it('handles multiple special characters', () => {
+    expect(toCategorySlug('Meat, Poultry & Seafood')).toBe('meat-poultry-and-seafood');
+    expect(toCategorySlug('Fridge, Deli & Eggs')).toBe('fridge-deli-and-eggs');
+  });
+
+  it('handles simple names without special characters', () => {
+    expect(toCategorySlug('Pantry')).toBe('pantry');
+    expect(toCategorySlug('Bakery')).toBe('bakery');
+  });
+
+  it('converts to lowercase', () => {
+    expect(toCategorySlug('PANTRY')).toBe('pantry');
+    expect(toCategorySlug('World Foods')).toBe('world-foods');
   });
 });

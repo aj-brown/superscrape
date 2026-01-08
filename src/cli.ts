@@ -14,6 +14,7 @@ export interface CliOptions {
   resume: boolean;
   runId?: number;
   concurrency: number;
+  dbPath: string;
 }
 
 /**
@@ -78,6 +79,10 @@ export function parseCliArgs(args: string[]): CliOptions {
         type: 'string',
         default: '1',
       },
+      'db-path': {
+        type: 'string',
+        default: './data/prices.db',
+      },
     },
     allowPositionals: true,
   });
@@ -107,6 +112,7 @@ export function parseCliArgs(args: string[]): CliOptions {
     resume: values.resume as boolean,
     runId,
     concurrency: parseInt(values.concurrency as string, 10),
+    dbPath: values['db-path'] as string,
   };
 }
 
@@ -127,6 +133,7 @@ Options:
   --log-format        Log format: text or json (default: text)
   --log-level         Log level: debug, info, warn, error (default: info)
   --config            Path to JSON config file
+  --db-path <path>    Database file path (default: ./data/prices.db)
   --resume            Resume last incomplete run
   --run-id <id>       Resume specific run by ID
   --concurrency <n>   Number of parallel workers (default: 1)

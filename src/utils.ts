@@ -147,6 +147,21 @@ export function extractStoreIdFromCookies(cookies: Cookie[]): string | null {
   return storeIdCookie?.value || null;
 }
 
+/**
+ * Convert a category name to a URL-safe slug.
+ * Examples:
+ *   "Chips, Nuts & Snacks" -> "chips-nuts-and-snacks"
+ *   "Sliced & Packaged Bread" -> "sliced-and-packaged-bread"
+ *   "Meat, Poultry & Seafood" -> "meat-poultry-and-seafood"
+ */
+export function toCategorySlug(categoryName: string): string {
+  return categoryName
+    .toLowerCase()
+    .replace(/,/g, '')
+    .replace(/ & /g, '-and-')
+    .replace(/ /g, '-');
+}
+
 export function getRequiredHeaders(cookies: Cookie[]): Record<string, string> {
   // Extract fs-user-token if available
   const fsToken = cookies.find((c) => c.name === 'fs-user-token');

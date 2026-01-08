@@ -62,5 +62,6 @@ export function mergeConfigWithCli(cli: CliOptions, config: Config | undefined):
     resume: cli.resume,
     runId: cli.runId,
     concurrency: config.concurrency ?? cli.concurrency,
+    dbPath: cli.dbPath,
   };
 }

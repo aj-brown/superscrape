@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "tsx src/index.ts --db-path ./data/dev.db --pages 2 -c \"Fridge, Deli & Eggs > Milk\" -c \"Meat, Poultry & Seafood > Beef\" -c \"Bakery > Sliced & Packaged Bread\"",
     "stats": "tsx src/stats-cli.ts",
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
