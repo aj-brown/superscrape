@@ -17,7 +17,9 @@ export {
   getProductsByCategory,
   getProductsOnPromo,
   searchProducts,
+  getDatabaseTotals,
   type PriceChange,
+  type DatabaseTotals,
 } from './queries';
 export {
   productToRecord,

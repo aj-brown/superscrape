@@ -19,6 +19,12 @@ export interface RunSummary {
   completedCategories: number;
 }
 
+export interface DatabaseTotals {
+  totalProducts: number;
+  totalSnapshots: number;
+  productsOnPromo: number;
+}
+
 export function getPriceHistory(dbPath: string, productId: string): PriceSnapshotRecord[] {
   const db = getDatabase(dbPath);
   const stmt = db.prepare(`
@@ -137,4 +143,30 @@ export function listRuns(dbPath: string, limit = 20): RunSummary[] {
     totalCategories: row.total_categories,
     completedCategories: row.completed_categories,
   }));
+}
+
+export function getDatabaseTotals(dbPath: string): DatabaseTotals {
+  const db = getDatabase(dbPath);
+
+  const productCount = db.prepare('SELECT COUNT(*) as count FROM products').get() as { count: number };
+  const snapshotCount = db.prepare('SELECT COUNT(*) as count FROM price_snapshots').get() as { count: number };
+
+  // Count products with promo in their latest snapshot
+  const promoCount = db.prepare(`
+    SELECT COUNT(*) as count FROM (
+      SELECT ps.product_id FROM price_snapshots ps
+      INNER JOIN (
+        SELECT product_id, MAX(scraped_at) as max_scraped_at
+        FROM price_snapshots
+        GROUP BY product_id
+      ) latest ON ps.product_id = latest.product_id AND ps.scraped_at = latest.max_scraped_at
+      WHERE ps.promo_price IS NOT NULL
+    )
+  `).get() as { count: number };
+
+  return {
+    totalProducts: productCount.count,
+    totalSnapshots: snapshotCount.count,
+    productsOnPromo: promoCount.count,
+  };
 }

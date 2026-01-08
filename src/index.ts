@@ -3,7 +3,7 @@ import * as path from 'path';
 import { parseCliArgs, printUsage } from './cli';
 import { parseCategories, selectCategories, type CategoryNode, type FlatCategory } from './categories';
 import { MultiCategoryScraper } from './multi-scraper';
-import { initDatabase, getIncompleteRun, getRunStatus } from './storage';
+import { initDatabase, getIncompleteRun, getRunStatus, getDatabaseTotals } from './storage';
 
 const CATEGORIES_PATH = './categories.json';
 
@@ -144,6 +144,13 @@ async function main() {
       console.log(`  - ${r.category}: ${r.error}`);
     }
   }
+
+  // Print database totals
+  const dbTotals = getDatabaseTotals(dbPath);
+  console.log('\n=== DATABASE TOTALS ===');
+  console.log(`Total products in database: ${dbTotals.totalProducts}`);
+  console.log(`Total price snapshots: ${dbTotals.totalSnapshots}`);
+  console.log(`Products on promo: ${dbTotals.productsOnPromo}`);
 
   console.log('\n✅ Scraping complete!');
 }

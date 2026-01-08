@@ -10,6 +10,7 @@ import {
   getProductsOnPromo,
   searchProducts,
   listRuns,
+  getDatabaseTotals,
 } from '../../src/storage/queries';
 import { createRun, updateCategoryRun, completeRun } from '../../src/storage/repository';
 import type { ProductRecord, PriceSnapshotRecord } from '../../src/storage/types';
@@ -248,6 +249,65 @@ describe('queries', () => {
       expect(runs).toHaveLength(2);
       expect(runs[0].id).toBe(3);
       expect(runs[1].id).toBe(2);
+    });
+  });
+
+  describe('getDatabaseTotals', () => {
+    it('returns zeros for empty database', () => {
+      const totals = getDatabaseTotals(TEST_DB_PATH);
+
+      expect(totals.totalProducts).toBe(0);
+      expect(totals.totalSnapshots).toBe(0);
+      expect(totals.productsOnPromo).toBe(0);
+    });
+
+    it('counts products correctly', () => {
+      upsertProduct(TEST_DB_PATH, makeProduct({ product_id: 'prod-1' }));
+      upsertProduct(TEST_DB_PATH, makeProduct({ product_id: 'prod-2' }));
+      upsertProduct(TEST_DB_PATH, makeProduct({ product_id: 'prod-3' }));
+
+      const totals = getDatabaseTotals(TEST_DB_PATH);
+
+      expect(totals.totalProducts).toBe(3);
+    });
+
+    it('counts snapshots correctly', () => {
+      upsertProduct(TEST_DB_PATH, makeProduct({ product_id: 'prod-1' }));
+
+      insertPriceSnapshot(TEST_DB_PATH, makeSnapshot({ product_id: 'prod-1', scraped_at: '2024-01-01T00:00:00Z' }));
+      insertPriceSnapshot(TEST_DB_PATH, makeSnapshot({ product_id: 'prod-1', scraped_at: '2024-01-02T00:00:00Z' }));
+      insertPriceSnapshot(TEST_DB_PATH, makeSnapshot({ product_id: 'prod-1', scraped_at: '2024-01-03T00:00:00Z' }));
+
+      const totals = getDatabaseTotals(TEST_DB_PATH);
+
+      expect(totals.totalSnapshots).toBe(3);
+    });
+
+    it('counts products on promo correctly', () => {
+      upsertProduct(TEST_DB_PATH, makeProduct({ product_id: 'promo-1' }));
+      upsertProduct(TEST_DB_PATH, makeProduct({ product_id: 'promo-2' }));
+      upsertProduct(TEST_DB_PATH, makeProduct({ product_id: 'no-promo' }));
+
+      insertPriceSnapshot(TEST_DB_PATH, makeSnapshot({ product_id: 'promo-1', promo_price: 3.99, scraped_at: '2024-01-01T00:00:00Z' }));
+      insertPriceSnapshot(TEST_DB_PATH, makeSnapshot({ product_id: 'promo-2', promo_price: 4.99, scraped_at: '2024-01-01T00:00:01Z' }));
+      insertPriceSnapshot(TEST_DB_PATH, makeSnapshot({ product_id: 'no-promo', promo_price: null, scraped_at: '2024-01-01T00:00:02Z' }));
+
+      const totals = getDatabaseTotals(TEST_DB_PATH);
+
+      expect(totals.productsOnPromo).toBe(2);
+    });
+
+    it('uses latest snapshot for promo status', () => {
+      upsertProduct(TEST_DB_PATH, makeProduct({ product_id: 'prod-1' }));
+
+      // First snapshot has promo
+      insertPriceSnapshot(TEST_DB_PATH, makeSnapshot({ product_id: 'prod-1', promo_price: 3.99, scraped_at: '2024-01-01T00:00:00Z' }));
+      // Latest snapshot has no promo
+      insertPriceSnapshot(TEST_DB_PATH, makeSnapshot({ product_id: 'prod-1', promo_price: null, scraped_at: '2024-01-02T00:00:00Z' }));
+
+      const totals = getDatabaseTotals(TEST_DB_PATH);
+
+      expect(totals.productsOnPromo).toBe(0);
     });
   });
 });
