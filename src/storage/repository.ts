@@ -1,5 +1,6 @@
 import { getDatabase } from './database';
 import type {
+  StoreRecord,
   ProductRecord,
   PriceSnapshotRecord,
   RunStatus,
@@ -7,6 +8,30 @@ import type {
   CategoryRunRecord,
   CategoryRunUpdate,
 } from './types';
+
+export function upsertStore(dbPath: string, store: StoreRecord): void {
+  const db = getDatabase(dbPath);
+  const stmt = db.prepare(`
+    INSERT INTO stores (store_id, name, address, region, latitude, longitude, last_synced)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(store_id) DO UPDATE SET
+      name = excluded.name,
+      address = excluded.address,
+      region = excluded.region,
+      latitude = excluded.latitude,
+      longitude = excluded.longitude,
+      last_synced = excluded.last_synced
+  `);
+  stmt.run(
+    store.store_id,
+    store.name,
+    store.address,
+    store.region,
+    store.latitude,
+    store.longitude,
+    store.last_synced
+  );
+}
 
 export function upsertProduct(dbPath: string, product: ProductRecord): void {
   const db = getDatabase(dbPath);
@@ -44,15 +69,16 @@ export function insertPriceSnapshot(dbPath: string, snapshot: PriceSnapshotRecor
   const db = getDatabase(dbPath);
   const stmt = db.prepare(`
     INSERT INTO price_snapshots (
-      product_id, scraped_at, price, price_per_unit, unit_of_measure,
+      product_id, store_id, scraped_at, price, price_per_unit, unit_of_measure,
       display_name, available_in_store, available_online, promo_price,
       promo_price_per_unit, promo_type, promo_description,
       promo_requires_card, promo_limit
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   stmt.run(
     snapshot.product_id,
+    snapshot.store_id,
     snapshot.scraped_at,
     snapshot.price,
     snapshot.price_per_unit,
@@ -110,7 +136,7 @@ export function getLatestPrices(dbPath: string): PriceSnapshotRecord[] {
 }
 
 // Run tracking functions
-export function createRun(dbPath: string, categories: string[]): number {
+export function createRun(dbPath: string, storeId: string, categories: string[]): number {
   const db = getDatabase(dbPath);
   const now = new Date().toISOString();
 
@@ -121,11 +147,11 @@ export function createRun(dbPath: string, categories: string[]): number {
   const runId = result.lastInsertRowid as number;
 
   const insertCategory = db.prepare(`
-    INSERT INTO category_runs (run_id, category_slug, status) VALUES (?, ?, 'pending')
+    INSERT INTO category_runs (run_id, store_id, category_slug, status) VALUES (?, ?, ?, 'pending')
   `);
 
   for (const category of categories) {
-    insertCategory.run(runId, category);
+    insertCategory.run(runId, storeId, category);
   }
 
   return runId;
@@ -134,6 +160,7 @@ export function createRun(dbPath: string, categories: string[]): number {
 export function updateCategoryRun(
   dbPath: string,
   runId: number,
+  storeId: string,
   categorySlug: string,
   update: CategoryRunUpdate
 ): void {
@@ -141,7 +168,7 @@ export function updateCategoryRun(
   const stmt = db.prepare(`
     UPDATE category_runs
     SET status = ?, last_page = ?, product_count = ?, error = ?
-    WHERE run_id = ? AND category_slug = ?
+    WHERE run_id = ? AND store_id = ? AND category_slug = ?
   `);
   stmt.run(
     update.status,
@@ -149,6 +176,7 @@ export function updateCategoryRun(
     update.productCount ?? null,
     update.error ?? null,
     runId,
+    storeId,
     categorySlug
   );
 }

@@ -3,16 +3,18 @@ import { existsSync, unlinkSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { initDatabase, closeDatabase } from '../../src/storage/database';
 import {
+  upsertStore,
   upsertProduct,
   insertPriceSnapshot,
   saveProducts,
   getProductHistory,
   getLatestPrices,
 } from '../../src/storage/repository';
-import type { ProductRecord, PriceSnapshotRecord } from '../../src/storage/types';
+import type { StoreRecord, ProductRecord, PriceSnapshotRecord } from '../../src/storage/types';
 
 const TEST_DB_DIR = join(__dirname, '../../.test-data');
 const TEST_DB_PATH = join(TEST_DB_DIR, 'test-repository.sqlite');
+const TEST_STORE_ID = 'test-store-001';
 
 describe('repository', () => {
   beforeEach(() => {
@@ -21,6 +23,17 @@ describe('repository', () => {
       unlinkSync(TEST_DB_PATH);
     }
     initDatabase(TEST_DB_PATH);
+
+    // Insert test store (required for foreign key constraint)
+    upsertStore(TEST_DB_PATH, {
+      store_id: TEST_STORE_ID,
+      name: 'Test Store',
+      address: '123 Test St',
+      region: 'NI',
+      latitude: -41.0,
+      longitude: 174.0,
+      last_synced: new Date().toISOString(),
+    });
   });
 
   afterEach(() => {
@@ -46,6 +59,7 @@ describe('repository', () => {
 
   const makeSnapshot = (overrides: Partial<PriceSnapshotRecord> = {}): PriceSnapshotRecord => ({
     product_id: 'test-123',
+    store_id: TEST_STORE_ID,
     scraped_at: '2024-01-01T00:00:00Z',
     price: 5.99,
     price_per_unit: 1.2,
@@ -60,6 +74,16 @@ describe('repository', () => {
     promo_requires_card: null,
     promo_limit: null,
     ...overrides,
+  });
+
+  const makeStore = (id: string): StoreRecord => ({
+    store_id: id,
+    name: `Store ${id}`,
+    address: '123 Test St',
+    region: 'NI',
+    latitude: -41.0,
+    longitude: 174.0,
+    last_synced: new Date().toISOString(),
   });
 
   describe('upsertProduct', () => {
@@ -118,18 +142,94 @@ describe('repository', () => {
       const db = initDatabase(TEST_DB_PATH);
       const result = db.prepare('SELECT * FROM price_snapshots WHERE product_id = ?').get('test-123') as PriceSnapshotRecord;
       expect(result.product_id).toBe('test-123');
+      expect(result.store_id).toBe(TEST_STORE_ID);
       expect(result.price).toBe(5.99);
       expect(result.price_per_unit).toBe(1.2);
     });
 
-    it('enforces unique constraint on product_id and scraped_at', () => {
+    it('enforces unique constraint on product_id, store_id, and scraped_at', () => {
       const product = makeProduct();
       upsertProduct(TEST_DB_PATH, product);
 
       const snapshot = makeSnapshot();
       insertPriceSnapshot(TEST_DB_PATH, snapshot);
 
-      expect(() => insertPriceSnapshot(TEST_DB_PATH, snapshot)).toThrow();
+      // Duplicate (product_id, store_id, scraped_at) should fail
+      expect(() => insertPriceSnapshot(TEST_DB_PATH, snapshot)).toThrow(/UNIQUE constraint failed/);
+    });
+
+    it('allows same product with different store_ids', () => {
+      // Create a second store
+      const store2 = makeStore('store-002');
+      upsertStore(TEST_DB_PATH, store2);
+
+      const product = makeProduct();
+      upsertProduct(TEST_DB_PATH, product);
+
+      const timestamp = '2024-01-01T00:00:00Z';
+      const snapshot1 = makeSnapshot({ store_id: TEST_STORE_ID, scraped_at: timestamp });
+      const snapshot2 = makeSnapshot({ store_id: 'store-002', scraped_at: timestamp });
+
+      // Should succeed - different stores
+      expect(() => insertPriceSnapshot(TEST_DB_PATH, snapshot1)).not.toThrow();
+      expect(() => insertPriceSnapshot(TEST_DB_PATH, snapshot2)).not.toThrow();
+    });
+
+    it('allows same product and store at different timestamps', () => {
+      const product = makeProduct();
+      upsertProduct(TEST_DB_PATH, product);
+
+      const snapshot1 = makeSnapshot({ scraped_at: '2024-01-01T00:00:00Z' });
+      const snapshot2 = makeSnapshot({ scraped_at: '2024-01-02T00:00:00Z' });
+
+      // Should succeed - different timestamps
+      expect(() => insertPriceSnapshot(TEST_DB_PATH, snapshot1)).not.toThrow();
+      expect(() => insertPriceSnapshot(TEST_DB_PATH, snapshot2)).not.toThrow();
+    });
+  });
+
+  describe('upsertStore', () => {
+    it('creates new store', () => {
+      const newStore = makeStore('new-store-001');
+      upsertStore(TEST_DB_PATH, newStore);
+
+      const db = initDatabase(TEST_DB_PATH);
+      const result = db.prepare('SELECT * FROM stores WHERE store_id = ?').get('new-store-001') as StoreRecord;
+      expect(result.store_id).toBe('new-store-001');
+      expect(result.name).toBe('Store new-store-001');
+    });
+
+    it('is idempotent', () => {
+      const store = makeStore('idempotent-store');
+
+      // Insert twice should not fail
+      expect(() => {
+        upsertStore(TEST_DB_PATH, store);
+        upsertStore(TEST_DB_PATH, store);
+      }).not.toThrow();
+    });
+
+    it('updates existing store', () => {
+      const store1 = makeStore('update-store');
+      upsertStore(TEST_DB_PATH, store1);
+
+      // Update with new data
+      const store2: StoreRecord = {
+        ...store1,
+        name: 'Updated Store Name',
+        address: 'New Address',
+      };
+      upsertStore(TEST_DB_PATH, store2);
+
+      // Store should be updated (no duplicate)
+      const db = initDatabase(TEST_DB_PATH);
+      const result = db.prepare('SELECT * FROM stores WHERE store_id = ?').get('update-store') as StoreRecord;
+      expect(result.name).toBe('Updated Store Name');
+      expect(result.address).toBe('New Address');
+
+      // Only one record
+      const count = db.prepare('SELECT COUNT(*) as count FROM stores WHERE store_id = ?').get('update-store') as { count: number };
+      expect(count.count).toBe(1);
     });
   });
 

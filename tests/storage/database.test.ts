@@ -97,7 +97,63 @@ describe('database', () => {
 
     const indexNames = indexes.map((i) => i.name);
     expect(indexNames).toContain('idx_snapshots_product');
+    expect(indexNames).toContain('idx_snapshots_store');
     expect(indexNames).toContain('idx_snapshots_date');
+    expect(indexNames).toContain('idx_category_runs_run');
+    expect(indexNames).toContain('idx_category_runs_store');
+  });
+
+  it('creates stores table with correct schema', () => {
+    const db = initDatabase(TEST_DB_PATH);
+    const tableInfo = db
+      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='stores'")
+      .get() as { name: string } | undefined;
+    expect(tableInfo?.name).toBe('stores');
+
+    const columns = db.prepare("PRAGMA table_info('stores')").all() as Array<{
+      name: string;
+      type: string;
+      notnull: number;
+      pk: number;
+    }>;
+
+    const columnNames = columns.map((c) => c.name);
+    expect(columnNames).toContain('store_id');
+    expect(columnNames).toContain('name');
+    expect(columnNames).toContain('address');
+    expect(columnNames).toContain('region');
+    expect(columnNames).toContain('latitude');
+    expect(columnNames).toContain('longitude');
+    expect(columnNames).toContain('last_synced');
+
+    const pkColumn = columns.find((c) => c.pk === 1);
+    expect(pkColumn?.name).toBe('store_id');
+  });
+
+  it('price_snapshots includes store_id column', () => {
+    const db = initDatabase(TEST_DB_PATH);
+    const columns = db.prepare("PRAGMA table_info('price_snapshots')").all() as Array<{
+      name: string;
+      type: string;
+      notnull: number;
+    }>;
+
+    const storeIdColumn = columns.find((c) => c.name === 'store_id');
+    expect(storeIdColumn).toBeDefined();
+    expect(storeIdColumn?.notnull).toBe(1);
+  });
+
+  it('category_runs includes store_id column', () => {
+    const db = initDatabase(TEST_DB_PATH);
+    const columns = db.prepare("PRAGMA table_info('category_runs')").all() as Array<{
+      name: string;
+      type: string;
+      notnull: number;
+    }>;
+
+    const storeIdColumn = columns.find((c) => c.name === 'store_id');
+    expect(storeIdColumn).toBeDefined();
+    expect(storeIdColumn?.notnull).toBe(1);
   });
 
   it('is idempotent - running twice does not error', () => {

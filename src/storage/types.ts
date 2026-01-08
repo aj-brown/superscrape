@@ -1,5 +1,15 @@
 import type { Database } from 'better-sqlite3';
 
+export interface StoreRecord {
+  store_id: string;
+  name: string;
+  address: string | null;
+  region: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  last_synced: string;
+}
+
 export interface ProductRecord {
   product_id: string;
   name: string;
@@ -16,6 +26,7 @@ export interface ProductRecord {
 export interface PriceSnapshotRecord {
   id?: number;
   product_id: string;
+  store_id: string;
   scraped_at: string;
   price: number;
   price_per_unit: number | null;

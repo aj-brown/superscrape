@@ -162,6 +162,14 @@ export class NewWorldScraper {
     }
   }
 
+  /**
+   * Get the current store ID.
+   * Returns null if scraper is not initialized.
+   */
+  getStoreId(): string | null {
+    return this.storeId;
+  }
+
   private async fetchProductsFromApi(query: SearchQuery): Promise<{
     products: Product[];
     totalHits: number;

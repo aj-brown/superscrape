@@ -9,6 +9,7 @@ import type { FlatCategory } from '../src/categories';
 const mockScrapeCategory = vi.fn();
 const mockInitialize = vi.fn();
 const mockClose = vi.fn();
+const mockGetStoreId = vi.fn().mockReturnValue('test-store-001');
 
 // Mock dependencies
 vi.mock('../src/scraper', () => ({
@@ -16,6 +17,7 @@ vi.mock('../src/scraper', () => ({
     initialize = mockInitialize.mockResolvedValue(undefined);
     scrapeCategory = mockScrapeCategory;
     close = mockClose.mockResolvedValue(undefined);
+    getStoreId = mockGetStoreId;
   },
 }));
 
@@ -53,6 +55,7 @@ describe('MultiCategoryScraper', () => {
       maxPages: 1,
       headless: true,
       dbPath: ':memory:',
+      storeId: 'test-store-001',
     };
 
     const scraper = new MultiCategoryScraper(config);
@@ -75,6 +78,7 @@ describe('MultiCategoryScraper', () => {
       maxPages: 1,
       headless: true,
       dbPath: ':memory:',
+      storeId: 'test-store-001',
     };
 
     const scraper = new MultiCategoryScraper(config);
@@ -91,6 +95,7 @@ describe('MultiCategoryScraper', () => {
       maxPages: 1,
       headless: true,
       dbPath: ':memory:',
+      storeId: 'test-store-001',
     };
 
     const scraper = new MultiCategoryScraper(config);
@@ -109,6 +114,7 @@ describe('MultiCategoryScraper', () => {
       maxPages: 1,
       headless: true,
       dbPath: ':memory:',
+      storeId: 'test-store-001',
       onProgress,
     };
 
@@ -127,6 +133,7 @@ describe('MultiCategoryScraper', () => {
       maxPages: 1,
       headless: true,
       dbPath: ':memory:',
+      storeId: 'test-store-001',
     };
 
     const scraper = new MultiCategoryScraper(config);

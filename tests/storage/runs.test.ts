@@ -3,6 +3,7 @@ import { existsSync, unlinkSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { initDatabase, closeDatabase } from '../../src/storage/database';
 import {
+  upsertStore,
   createRun,
   updateCategoryRun,
   getIncompleteRun,
@@ -12,6 +13,7 @@ import {
 
 const TEST_DB_DIR = join(__dirname, '../../.test-data');
 const TEST_DB_PATH = join(TEST_DB_DIR, 'test-runs.sqlite');
+const TEST_STORE_ID = 'test-store-001';
 
 describe('Scrape Run Tracking', () => {
   beforeEach(() => {
@@ -20,6 +22,17 @@ describe('Scrape Run Tracking', () => {
       unlinkSync(TEST_DB_PATH);
     }
     initDatabase(TEST_DB_PATH);
+
+    // Insert test store (required for foreign key constraint)
+    upsertStore(TEST_DB_PATH, {
+      store_id: TEST_STORE_ID,
+      name: 'Test Store',
+      address: '123 Test St',
+      region: 'NI',
+      latitude: -41.0,
+      longitude: 174.0,
+      last_synced: new Date().toISOString(),
+    });
   });
 
   afterEach(() => {
@@ -32,7 +45,7 @@ describe('Scrape Run Tracking', () => {
   describe('createRun', () => {
     it('creates run record with correct initial state', () => {
       const categories = ['Pantry', 'Bakery', 'Dairy'];
-      const runId = createRun(TEST_DB_PATH, categories);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categories);
 
       expect(runId).toBeGreaterThan(0);
 
@@ -45,7 +58,7 @@ describe('Scrape Run Tracking', () => {
 
     it('creates category run entries', () => {
       const categories = ['Pantry', 'Bakery'];
-      const runId = createRun(TEST_DB_PATH, categories);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categories);
 
       const status = getRunStatus(TEST_DB_PATH, runId);
       expect(status?.categories.length).toBe(2);
@@ -57,9 +70,9 @@ describe('Scrape Run Tracking', () => {
   describe('updateCategoryRun', () => {
     it('updates category progress after completion', () => {
       const categories = ['Pantry', 'Bakery'];
-      const runId = createRun(TEST_DB_PATH, categories);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categories);
 
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry', {
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry', {
         status: 'completed',
         lastPage: 5,
         productCount: 100,
@@ -74,9 +87,9 @@ describe('Scrape Run Tracking', () => {
 
     it('records error on failure', () => {
       const categories = ['Pantry'];
-      const runId = createRun(TEST_DB_PATH, categories);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categories);
 
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry', {
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry', {
         status: 'failed',
         lastPage: 3,
         error: 'Network timeout',
@@ -92,7 +105,7 @@ describe('Scrape Run Tracking', () => {
 
   describe('getIncompleteRun', () => {
     it('returns most recent incomplete run', () => {
-      const runId = createRun(TEST_DB_PATH, ['Pantry', 'Bakery']);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, ['Pantry', 'Bakery']);
 
       const incomplete = getIncompleteRun(TEST_DB_PATH);
       expect(incomplete).toBeDefined();
@@ -100,7 +113,7 @@ describe('Scrape Run Tracking', () => {
     });
 
     it('returns null when no incomplete runs exist', () => {
-      const runId = createRun(TEST_DB_PATH, ['Pantry']);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, ['Pantry']);
       completeRun(TEST_DB_PATH, runId);
 
       const incomplete = getIncompleteRun(TEST_DB_PATH);
@@ -108,10 +121,10 @@ describe('Scrape Run Tracking', () => {
     });
 
     it('returns categories that need to be resumed', () => {
-      const runId = createRun(TEST_DB_PATH, ['Pantry', 'Bakery', 'Dairy']);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, ['Pantry', 'Bakery', 'Dairy']);
 
       // Complete Pantry
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry', {
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry', {
         status: 'completed',
         lastPage: 5,
         productCount: 100,
@@ -127,8 +140,8 @@ describe('Scrape Run Tracking', () => {
 
   describe('completeRun', () => {
     it('marks run as completed', () => {
-      const runId = createRun(TEST_DB_PATH, ['Pantry']);
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry', {
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, ['Pantry']);
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry', {
         status: 'completed',
         lastPage: 5,
         productCount: 100,

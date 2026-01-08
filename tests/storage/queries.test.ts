@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { existsSync, unlinkSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { initDatabase, closeDatabase } from '../../src/storage/database';
-import { upsertProduct, insertPriceSnapshot } from '../../src/storage/repository';
+import { upsertStore, upsertProduct, insertPriceSnapshot } from '../../src/storage/repository';
 import {
   getPriceHistory,
   getPriceChanges,
@@ -17,6 +17,7 @@ import type { ProductRecord, PriceSnapshotRecord } from '../../src/storage/types
 
 const TEST_DB_DIR = join(__dirname, '../../.test-data');
 const TEST_DB_PATH = join(TEST_DB_DIR, 'test-queries.sqlite');
+const TEST_STORE_ID = 'test-store-001';
 
 describe('queries', () => {
   beforeEach(() => {
@@ -25,6 +26,17 @@ describe('queries', () => {
       unlinkSync(TEST_DB_PATH);
     }
     initDatabase(TEST_DB_PATH);
+
+    // Insert test store (required for foreign key constraint)
+    upsertStore(TEST_DB_PATH, {
+      store_id: TEST_STORE_ID,
+      name: 'Test Store',
+      address: '123 Test St',
+      region: 'NI',
+      latitude: -41.0,
+      longitude: 174.0,
+      last_synced: new Date().toISOString(),
+    });
   });
 
   afterEach(() => {
@@ -50,6 +62,7 @@ describe('queries', () => {
 
   const makeSnapshot = (overrides: Partial<PriceSnapshotRecord> = {}): PriceSnapshotRecord => ({
     product_id: 'test-123',
+    store_id: TEST_STORE_ID,
     scraped_at: '2024-01-01T00:00:00Z',
     price: 5.99,
     price_per_unit: 1.2,
@@ -199,8 +212,8 @@ describe('queries', () => {
     });
 
     it('returns runs in reverse chronological order', () => {
-      createRun(TEST_DB_PATH, ['Pantry']);
-      createRun(TEST_DB_PATH, ['Bakery', 'Dairy']);
+      createRun(TEST_DB_PATH, TEST_STORE_ID, ['Pantry']);
+      createRun(TEST_DB_PATH, TEST_STORE_ID, ['Bakery', 'Dairy']);
 
       const runs = listRuns(TEST_DB_PATH);
 
@@ -210,8 +223,8 @@ describe('queries', () => {
     });
 
     it('includes run status and category counts', () => {
-      const runId = createRun(TEST_DB_PATH, ['Pantry', 'Bakery', 'Dairy']);
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry', {
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, ['Pantry', 'Bakery', 'Dairy']);
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry', {
         status: 'completed',
         lastPage: 5,
         productCount: 100,
@@ -225,8 +238,8 @@ describe('queries', () => {
     });
 
     it('shows completed runs with completion time', () => {
-      const runId = createRun(TEST_DB_PATH, ['Pantry']);
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry', {
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, ['Pantry']);
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry', {
         status: 'completed',
         lastPage: 5,
         productCount: 100,
@@ -240,9 +253,9 @@ describe('queries', () => {
     });
 
     it('respects limit parameter', () => {
-      createRun(TEST_DB_PATH, ['Pantry']);
-      createRun(TEST_DB_PATH, ['Bakery']);
-      createRun(TEST_DB_PATH, ['Dairy']);
+      createRun(TEST_DB_PATH, TEST_STORE_ID, ['Pantry']);
+      createRun(TEST_DB_PATH, TEST_STORE_ID, ['Bakery']);
+      createRun(TEST_DB_PATH, TEST_STORE_ID, ['Dairy']);
 
       const runs = listRuns(TEST_DB_PATH, 2);
 

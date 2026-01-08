@@ -9,7 +9,18 @@ function enableWalMode(db: DatabaseConnection): void {
 }
 
 const SCHEMA = `
--- Master product data (upserted on each scrape)
+-- Store metadata cache
+CREATE TABLE IF NOT EXISTS stores (
+  store_id    TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  address     TEXT,
+  region      TEXT,
+  latitude    REAL,
+  longitude   REAL,
+  last_synced TEXT NOT NULL
+);
+
+-- Master product data (store-agnostic, upserted on each scrape)
 CREATE TABLE IF NOT EXISTS products (
   product_id      TEXT PRIMARY KEY,
   name            TEXT NOT NULL,
@@ -23,10 +34,11 @@ CREATE TABLE IF NOT EXISTS products (
   last_seen       TEXT NOT NULL
 );
 
--- Price history (one row per product per scrape)
+-- Price history (per-store, one row per product per store per scrape)
 CREATE TABLE IF NOT EXISTS price_snapshots (
   id                  INTEGER PRIMARY KEY AUTOINCREMENT,
   product_id          TEXT NOT NULL REFERENCES products(product_id),
+  store_id            TEXT NOT NULL REFERENCES stores(store_id),
   scraped_at          TEXT NOT NULL,
   price               REAL NOT NULL,
   price_per_unit      REAL,
@@ -40,10 +52,11 @@ CREATE TABLE IF NOT EXISTS price_snapshots (
   promo_description   TEXT,
   promo_requires_card INTEGER,
   promo_limit         INTEGER,
-  UNIQUE(product_id, scraped_at)
+  UNIQUE(product_id, store_id, scraped_at)
 );
 
 CREATE INDEX IF NOT EXISTS idx_snapshots_product ON price_snapshots(product_id);
+CREATE INDEX IF NOT EXISTS idx_snapshots_store ON price_snapshots(store_id);
 CREATE INDEX IF NOT EXISTS idx_snapshots_date ON price_snapshots(scraped_at);
 
 -- Scrape run tracking for resume/checkpoint support
@@ -54,18 +67,21 @@ CREATE TABLE IF NOT EXISTS scrape_runs (
   status        TEXT NOT NULL DEFAULT 'in_progress'
 );
 
+-- Category run tracking (per-store)
 CREATE TABLE IF NOT EXISTS category_runs (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   run_id        INTEGER NOT NULL REFERENCES scrape_runs(id),
+  store_id      TEXT NOT NULL REFERENCES stores(store_id),
   category_slug TEXT NOT NULL,
   status        TEXT NOT NULL DEFAULT 'pending',
   last_page     INTEGER,
   product_count INTEGER,
   error         TEXT,
-  UNIQUE(run_id, category_slug)
+  UNIQUE(run_id, store_id, category_slug)
 );
 
 CREATE INDEX IF NOT EXISTS idx_category_runs_run ON category_runs(run_id);
+CREATE INDEX IF NOT EXISTS idx_category_runs_store ON category_runs(store_id);
 `;
 
 export function initDatabase(path: string): DatabaseConnection {

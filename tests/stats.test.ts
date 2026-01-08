@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { unlink } from 'node:fs/promises';
 import { initDatabase, closeDatabase } from '../src/storage/database';
-import { saveProducts } from '../src/storage/repository';
+import { upsertStore, saveProducts } from '../src/storage/repository';
 import {
   getOverallStats,
   formatPriceChange,
@@ -11,10 +11,22 @@ import type { ProductRecord, PriceSnapshotRecord } from '../src/storage/types';
 import type { PriceChange } from '../src/storage/queries';
 
 const TEST_DB = '/tmp/stats-test.db';
+const TEST_STORE_ID = 'test-store-001';
 
 describe('stats', () => {
   beforeEach(() => {
     initDatabase(TEST_DB);
+
+    // Insert test store (required for foreign key constraint)
+    upsertStore(TEST_DB, {
+      store_id: TEST_STORE_ID,
+      name: 'Test Store',
+      address: '123 Test St',
+      region: 'NI',
+      latitude: -41.0,
+      longitude: 174.0,
+      last_synced: new Date().toISOString(),
+    });
   });
 
   afterEach(async () => {
@@ -62,6 +74,7 @@ describe('stats', () => {
       const snapshots: PriceSnapshotRecord[] = [
         {
           product_id: 'p1',
+          store_id: TEST_STORE_ID,
           scraped_at: now,
           price: 3.99,
           price_per_unit: null,
@@ -78,6 +91,7 @@ describe('stats', () => {
         },
         {
           product_id: 'p2',
+          store_id: TEST_STORE_ID,
           scraped_at: now,
           price: 2.99,
           price_per_unit: null,

@@ -3,10 +3,14 @@ import * as path from 'path';
 import { parseCliArgs, printUsage } from './cli';
 import { parseCategories, selectCategories, type CategoryNode } from './categories';
 import { MultiCategoryScraper } from './multi-scraper';
-import { initDatabase, getDatabaseTotals } from './storage';
+import { initDatabase, getDatabaseTotals, upsertStore } from './storage';
 import { resolveResumeState } from './resume';
 
 const CATEGORIES_PATH = './categories.json';
+
+// Default store ID (New World Metro Auckland) - will be configurable in future
+const DEFAULT_STORE_ID = '60928d93-06fa-4d8f-92a6-8c359e7e846d';
+const DEFAULT_STORE_NAME = 'New World Metro Auckland';
 
 async function main() {
   // Parse CLI arguments
@@ -62,6 +66,18 @@ async function main() {
   // Initialize database
   console.log('💾 Initializing database...');
   initDatabase(dbPath);
+
+  // Ensure default store exists in database
+  upsertStore(dbPath, {
+    store_id: DEFAULT_STORE_ID,
+    name: DEFAULT_STORE_NAME,
+    address: null,
+    region: null,
+    latitude: null,
+    longitude: null,
+    last_synced: new Date().toISOString(),
+  });
+
   console.log(`✅ Database ready at ${dbPath}\n`);
 
   // Capture database totals before scraping
@@ -100,6 +116,7 @@ async function main() {
     maxPages: options.maxPages,
     headless: options.headless,
     dbPath,
+    storeId: DEFAULT_STORE_ID,
     runId,
     concurrency: options.concurrency,
     onProgress: (progress) => {

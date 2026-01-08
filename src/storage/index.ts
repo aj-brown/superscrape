@@ -1,5 +1,6 @@
 export { initDatabase, getDatabase, closeDatabase, checkpoint } from './database';
 export {
+  upsertStore,
   upsertProduct,
   insertPriceSnapshot,
   saveProducts,
@@ -27,6 +28,7 @@ export {
   productsToRecordsAndSnapshots,
 } from './converters';
 export type {
+  StoreRecord,
   ProductRecord,
   PriceSnapshotRecord,
   StorageConfig,

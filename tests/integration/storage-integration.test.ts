@@ -8,11 +8,13 @@ import {
   getLatestPrices,
   getProductHistory,
   productsToRecordsAndSnapshots,
+  upsertStore,
 } from '../../src/storage';
 import type { Product } from '../../src/utils';
 
 const TEST_DB_DIR = join(__dirname, '../../.test-data');
 const TEST_DB_PATH = join(TEST_DB_DIR, 'test-integration.sqlite');
+const TEST_STORE_ID = 'test-store-001';
 
 describe('Storage Integration', () => {
   beforeEach(() => {
@@ -21,6 +23,17 @@ describe('Storage Integration', () => {
       unlinkSync(TEST_DB_PATH);
     }
     initDatabase(TEST_DB_PATH);
+
+    // Insert test store (required for foreign key constraint)
+    upsertStore(TEST_DB_PATH, {
+      store_id: TEST_STORE_ID,
+      name: 'Test Store',
+      address: '123 Test St',
+      region: 'NI',
+      latitude: -41.0,
+      longitude: 174.0,
+      last_synced: new Date().toISOString(),
+    });
   });
 
   afterEach(() => {
@@ -55,7 +68,7 @@ describe('Storage Integration', () => {
     ];
 
     const timestamp = '2024-01-01T00:00:00Z';
-    const { records, snapshots } = productsToRecordsAndSnapshots(products, timestamp);
+    const { records, snapshots } = productsToRecordsAndSnapshots(products, TEST_STORE_ID, timestamp);
     saveProducts(TEST_DB_PATH, records, snapshots);
 
     const latestPrices = getLatestPrices(TEST_DB_PATH);
@@ -72,6 +85,7 @@ describe('Storage Integration', () => {
     const timestamp1 = '2024-01-01T00:00:00Z';
     const { records: records1, snapshots: snapshots1 } = productsToRecordsAndSnapshots(
       [product],
+      TEST_STORE_ID,
       timestamp1
     );
     saveProducts(TEST_DB_PATH, records1, snapshots1);
@@ -81,6 +95,7 @@ describe('Storage Integration', () => {
     const timestamp2 = '2024-01-02T00:00:00Z';
     const { records: records2, snapshots: snapshots2 } = productsToRecordsAndSnapshots(
       [updatedProduct],
+      TEST_STORE_ID,
       timestamp2
     );
     saveProducts(TEST_DB_PATH, records2, snapshots2);
@@ -90,6 +105,7 @@ describe('Storage Integration', () => {
     const timestamp3 = '2024-01-03T00:00:00Z';
     const { records: records3, snapshots: snapshots3 } = productsToRecordsAndSnapshots(
       [finalProduct],
+      TEST_STORE_ID,
       timestamp3
     );
     saveProducts(TEST_DB_PATH, records3, snapshots3);
@@ -111,7 +127,7 @@ describe('Storage Integration', () => {
     const products: Product[] = [makeProduct({ productId: 'persistent-prod', price: 9.99 })];
 
     const timestamp = '2024-01-01T00:00:00Z';
-    const { records, snapshots } = productsToRecordsAndSnapshots(products, timestamp);
+    const { records, snapshots } = productsToRecordsAndSnapshots(products, TEST_STORE_ID, timestamp);
     saveProducts(TEST_DB_PATH, records, snapshots);
 
     // Close and reopen the database
@@ -138,7 +154,7 @@ describe('Storage Integration', () => {
     });
 
     const timestamp = '2024-01-01T00:00:00Z';
-    const { records, snapshots } = productsToRecordsAndSnapshots([productWithPromo], timestamp);
+    const { records, snapshots } = productsToRecordsAndSnapshots([productWithPromo], TEST_STORE_ID, timestamp);
     saveProducts(TEST_DB_PATH, records, snapshots);
 
     const latest = getLatestPrices(TEST_DB_PATH);

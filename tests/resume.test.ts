@@ -2,12 +2,13 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { existsSync, unlinkSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { initDatabase, closeDatabase } from '../src/storage/database';
-import { createRun, updateCategoryRun, completeRun } from '../src/storage/repository';
+import { upsertStore, createRun, updateCategoryRun, completeRun } from '../src/storage/repository';
 import { resolveResumeState, ResumeResult } from '../src/resume';
 import type { FlatCategory } from '../src/categories';
 
 const TEST_DB_DIR = join(__dirname, '../.test-data');
 const TEST_DB_PATH = join(TEST_DB_DIR, 'test-resume.sqlite');
+const TEST_STORE_ID = 'test-store-001';
 
 const mockCategories: FlatCategory[] = [
   { category0: 'Pantry', category1: 'Baking', url: '/pantry/baking' },
@@ -22,6 +23,17 @@ describe('resolveResumeState', () => {
       unlinkSync(TEST_DB_PATH);
     }
     initDatabase(TEST_DB_PATH);
+
+    // Insert test store (required for foreign key constraint)
+    upsertStore(TEST_DB_PATH, {
+      store_id: TEST_STORE_ID,
+      name: 'Test Store',
+      address: '123 Test St',
+      region: 'NI',
+      latitude: -41.0,
+      longitude: 174.0,
+      last_synced: new Date().toISOString(),
+    });
   });
 
   afterEach(() => {
@@ -59,7 +71,7 @@ describe('resolveResumeState', () => {
       const categorySlugs = mockCategories.map(
         (c) => `${c.category0} > ${c.category1}`
       );
-      const existingRunId = createRun(TEST_DB_PATH, categorySlugs);
+      const existingRunId = createRun(TEST_DB_PATH, TEST_STORE_ID, categorySlugs);
 
       const result = resolveResumeState(TEST_DB_PATH, mockCategories, {
         resume: true,
@@ -73,10 +85,10 @@ describe('resolveResumeState', () => {
       const categorySlugs = mockCategories.map(
         (c) => `${c.category0} > ${c.category1}`
       );
-      const runId = createRun(TEST_DB_PATH, categorySlugs);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categorySlugs);
 
       // Complete Pantry > Baking
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry > Baking', {
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry > Baking', {
         status: 'completed',
         lastPage: 5,
         productCount: 100,
@@ -97,15 +109,15 @@ describe('resolveResumeState', () => {
       const categorySlugs = mockCategories.map(
         (c) => `${c.category0} > ${c.category1}`
       );
-      const runId = createRun(TEST_DB_PATH, categorySlugs);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categorySlugs);
 
       // Complete first, fail second
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry > Baking', {
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry > Baking', {
         status: 'completed',
         lastPage: 5,
         productCount: 100,
       });
-      updateCategoryRun(TEST_DB_PATH, runId, 'Bakery > Bread', {
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Bakery > Bread', {
         status: 'failed',
         error: 'Network error',
       });
@@ -125,11 +137,11 @@ describe('resolveResumeState', () => {
       const categorySlugs = mockCategories.map(
         (c) => `${c.category0} > ${c.category1}`
       );
-      const runId = createRun(TEST_DB_PATH, categorySlugs);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categorySlugs);
 
       // Complete all categories
       for (const slug of categorySlugs) {
-        updateCategoryRun(TEST_DB_PATH, runId, slug, {
+        updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, slug, {
           status: 'completed',
           lastPage: 5,
           productCount: 100,
@@ -150,7 +162,7 @@ describe('resolveResumeState', () => {
       const categorySlugs = mockCategories.map(
         (c) => `${c.category0} > ${c.category1}`
       );
-      const runId = createRun(TEST_DB_PATH, categorySlugs);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categorySlugs);
 
       const result = resolveResumeState(TEST_DB_PATH, mockCategories, {
         resume: false,
@@ -174,7 +186,7 @@ describe('resolveResumeState', () => {
       const categorySlugs = mockCategories.map(
         (c) => `${c.category0} > ${c.category1}`
       );
-      const runId = createRun(TEST_DB_PATH, categorySlugs);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categorySlugs);
       completeRun(TEST_DB_PATH, runId);
 
       expect(() =>
@@ -189,10 +201,10 @@ describe('resolveResumeState', () => {
       const categorySlugs = mockCategories.map(
         (c) => `${c.category0} > ${c.category1}`
       );
-      const runId = createRun(TEST_DB_PATH, categorySlugs);
+      const runId = createRun(TEST_DB_PATH, TEST_STORE_ID, categorySlugs);
 
       // Complete first category
-      updateCategoryRun(TEST_DB_PATH, runId, 'Pantry > Baking', {
+      updateCategoryRun(TEST_DB_PATH, runId, TEST_STORE_ID, 'Pantry > Baking', {
         status: 'completed',
         lastPage: 5,
         productCount: 100,

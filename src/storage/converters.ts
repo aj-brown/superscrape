@@ -16,9 +16,14 @@ export function productToRecord(product: Product, timestamp: string): ProductRec
   };
 }
 
-export function productToSnapshot(product: Product, timestamp: string): PriceSnapshotRecord {
+export function productToSnapshot(
+  product: Product,
+  storeId: string,
+  timestamp: string
+): PriceSnapshotRecord {
   return {
     product_id: product.productId,
+    store_id: storeId,
     scraped_at: timestamp,
     price: product.price,
     price_per_unit: product.pricePerUnit ?? null,
@@ -37,10 +42,11 @@ export function productToSnapshot(product: Product, timestamp: string): PriceSna
 
 export function productsToRecordsAndSnapshots(
   products: Product[],
+  storeId: string,
   timestamp: string
 ): { records: ProductRecord[]; snapshots: PriceSnapshotRecord[] } {
   return {
     records: products.map((p) => productToRecord(p, timestamp)),
-    snapshots: products.map((p) => productToSnapshot(p, timestamp)),
+    snapshots: products.map((p) => productToSnapshot(p, storeId, timestamp)),
   };
 }

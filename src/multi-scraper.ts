@@ -14,6 +14,7 @@ export interface MultiScraperConfig {
   maxPages: number;
   headless: boolean;
   dbPath: string;
+  storeId: string;
   runId?: number;
   concurrency?: number;
   onProgress?: (progress: ScrapeProgress) => void;
@@ -51,7 +52,7 @@ export class MultiCategoryScraper {
       (c) => `${c.category0} > ${c.category1}`
     );
     const runId =
-      this.config.runId ?? createRun(this.config.dbPath, categorySlugs);
+      this.config.runId ?? createRun(this.config.dbPath, this.config.storeId, categorySlugs);
 
     const progress: ScrapeProgress = {
       runId,
@@ -106,7 +107,7 @@ export class MultiCategoryScraper {
     const categoryPath = `${category.category0} > ${category.category1}`;
 
     // Mark category as in progress
-    updateCategoryRun(this.config.dbPath, runId, categoryPath, {
+    updateCategoryRun(this.config.dbPath, runId, this.config.storeId, categoryPath, {
       status: 'in_progress',
     });
 
@@ -119,13 +120,17 @@ export class MultiCategoryScraper {
 
       // Save products to database
       if (products.length > 0) {
+        const storeId = scraper.getStoreId();
+        if (!storeId) {
+          throw new Error('Scraper store ID not available');
+        }
         const timestamp = new Date().toISOString();
-        const { records, snapshots } = productsToRecordsAndSnapshots(products, timestamp);
+        const { records, snapshots } = productsToRecordsAndSnapshots(products, storeId, timestamp);
         saveProducts(this.config.dbPath, records, snapshots);
       }
 
       // Mark category as completed
-      updateCategoryRun(this.config.dbPath, runId, categoryPath, {
+      updateCategoryRun(this.config.dbPath, runId, this.config.storeId, categoryPath, {
         status: 'completed',
         lastPage: this.config.maxPages,
         productCount: products.length,
@@ -143,7 +148,7 @@ export class MultiCategoryScraper {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
       // Mark category as failed
-      updateCategoryRun(this.config.dbPath, runId, categoryPath, {
+      updateCategoryRun(this.config.dbPath, runId, this.config.storeId, categoryPath, {
         status: 'failed',
         error: errorMessage,
       });

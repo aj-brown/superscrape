@@ -470,11 +470,11 @@ npm run dev -- --resume --store "New World Metro Auckland"
 ## Implementation Checklist
 
 ### Phase 1: Database Schema
-- [ ] Create fresh schema with `stores` table
-- [ ] Add `store_id` column to `price_snapshots` table
-- [ ] Add `store_id` column to `category_runs` table
-- [ ] Update unique constraints for multi-store support
-- [ ] Add indexes for store-based queries
+- [x] Create fresh schema with `stores` table
+- [x] Add `store_id` column to `price_snapshots` table
+- [x] Add `store_id` column to `category_runs` table
+- [x] Update unique constraints for multi-store support
+- [x] Add indexes for store-based queries
 
 **Acceptance Criteria:**
 - Schema creates successfully with `npm run dev` (auto-init)

@@ -2,11 +2,12 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { existsSync, unlinkSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { initDatabase, closeDatabase } from '../src/storage/database';
-import { upsertProduct, insertPriceSnapshot } from '../src/storage/repository';
+import { upsertStore, upsertProduct, insertPriceSnapshot } from '../src/storage/repository';
 import { exportData, formatCsv, formatJson } from '../src/export';
 
 const TEST_DB_DIR = join(__dirname, '../.test-data');
 const TEST_DB_PATH = join(TEST_DB_DIR, 'test-export.sqlite');
+const TEST_STORE_ID = 'test-store-001';
 
 describe('export', () => {
   beforeEach(() => {
@@ -17,6 +18,17 @@ describe('export', () => {
 
     // Set up test data
     initDatabase(TEST_DB_PATH);
+
+    // Insert test store (required for foreign key constraint)
+    upsertStore(TEST_DB_PATH, {
+      store_id: TEST_STORE_ID,
+      name: 'Test Store',
+      address: '123 Test St',
+      region: 'NI',
+      latitude: -41.0,
+      longitude: 174.0,
+      last_synced: new Date().toISOString(),
+    });
 
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -38,6 +50,7 @@ describe('export', () => {
 
     insertPriceSnapshot(TEST_DB_PATH, {
       product_id: 'prod-1',
+      store_id: TEST_STORE_ID,
       scraped_at: now.toISOString(),
       price: 5.99,
       price_per_unit: 1.2,
@@ -69,6 +82,7 @@ describe('export', () => {
 
     insertPriceSnapshot(TEST_DB_PATH, {
       product_id: 'prod-2',
+      store_id: TEST_STORE_ID,
       scraped_at: yesterday.toISOString(),
       price: 3.5,
       price_per_unit: null,
@@ -100,6 +114,7 @@ describe('export', () => {
 
     insertPriceSnapshot(TEST_DB_PATH, {
       product_id: 'prod-3',
+      store_id: TEST_STORE_ID,
       scraped_at: lastWeek.toISOString(),
       price: 10.0,
       price_per_unit: 10.0,
