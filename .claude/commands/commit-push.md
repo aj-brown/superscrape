@@ -7,8 +7,7 @@ allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git c
 
 - Current branch: !`git branch --show-current`
 - Git status: !`git status`
-- Staged changes: !`git diff --cached`
-- Unstaged changes: !`git diff`
+- Current git diff (staged and unstaged changes): !`git diff HEAD`
 - Recent commits for style reference: !`git log --oneline -5`
 
 ## Your task

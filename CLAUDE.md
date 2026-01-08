@@ -91,4 +91,4 @@ The `src/reliability/` module provides fault tolerance for scraping operations:
 - **Retry with exponential backoff** - Automatic retry with configurable delays
 - **Circuit breaker** - Prevents cascading failures by failing fast
 - **Rate limiter** - Token bucket algorithm for request throttling
-- **Structured logging** - Consistent logging across all components
+- **Structured logging** - Consistent logging across all components.
