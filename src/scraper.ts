@@ -2,13 +2,17 @@ import { Camoufox } from 'camoufox';
 import type { Browser, BrowserContext, Cookie, Page, Request } from 'playwright-core';
 import {
   parseProductFromApi,
+  parseStoreFromApi,
   extractStoreIdFromCookies,
   buildProductSearchPayload,
   buildApiHeaders,
   PRODUCTS_API_URL,
   CATEGORIES_API_URL,
+  STORES_API_URL,
   type Product,
   type CategoryInfo,
+  type StoreInfo,
+  type StoreApiResponse,
   type SearchQuery,
 } from './utils';
 import { createReliabilityWrapper, type ReliabilityConfig } from './reliability';
@@ -263,6 +267,35 @@ export class NewWorldScraper {
     const categories = data.categories || [];
     console.log(`📂 Found ${categories.length} top-level categories`);
     return categories;
+  }
+
+  async getStores(): Promise<StoreInfo[]> {
+    if (!this.page) {
+      throw new Error('Scraper not initialized. Call initialize() first.');
+    }
+
+    await this.ensureValidToken();
+
+    if (!this.authorizationToken) {
+      throw new Error('No valid authorization token available');
+    }
+
+    console.log('🏪 Fetching stores from API...');
+
+    const headers = buildApiHeaders(this.cookies, this.authorizationToken);
+
+    const response = await this.reliability.execute(async () => {
+      return this.page!.context().request.get(STORES_API_URL, { headers });
+    });
+
+    if (!response.ok()) {
+      throw new Error(`Stores API failed: ${response.status()} ${response.statusText()}`);
+    }
+
+    const data = (await response.json()) as { stores?: StoreApiResponse[] };
+    const stores = (data.stores || []).map(parseStoreFromApi);
+    console.log(`🏪 Found ${stores.length} stores`);
+    return stores;
   }
 
   async scrapeCategory(

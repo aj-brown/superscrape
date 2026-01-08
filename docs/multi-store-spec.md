@@ -488,13 +488,13 @@ npm run dev -- --resume --store "New World Metro Auckland"
 ---
 
 ### Phase 2: Store API Client
-- [ ] Add `STORES_API_URL` constant to `src/utils.ts`
-- [ ] Add `StoreInfo` type and `parseStoreFromApi()` to `src/utils.ts`
-- [ ] Add `getStores()` method to `NewWorldScraper` (like `getCategories()`)
-- [ ] Create `src/stores.ts` with utility functions (no API calls)
-- [ ] Implement `syncStoresToDb()` - cache stores in database
-- [ ] Implement `sampleStores()` - random selection for testing
-- [ ] Implement `findStoreByName()` - fuzzy match for CLI
+- [x] Add `STORES_API_URL` constant to `src/utils.ts`
+- [x] Add `StoreInfo` type and `parseStoreFromApi()` to `src/utils.ts`
+- [x] Add `getStores()` method to `NewWorldScraper` (like `getCategories()`)
+- [x] Create `src/stores.ts` with utility functions (no API calls)
+- [x] Implement `syncStoresToDb()` - cache stores in database
+- [x] Implement `sampleStores()` - random selection for testing
+- [x] Implement `findStoreByName()` - fuzzy match for CLI
 
 **Acceptance Criteria:**
 - `scraper.getStores()` returns array of 144 stores with required fields

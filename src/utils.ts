@@ -4,6 +4,8 @@ export const PRODUCTS_API_URL =
   'https://api-prod.newworld.co.nz/v1/edge/search/paginated/products';
 export const CATEGORIES_API_URL =
   'https://api-prod.newworld.co.nz/v1/edge/categories';
+export const STORES_API_URL =
+  'https://api-prod.newworld.co.nz/v1/edge/store';
 
 export interface NewWorldCookies {
   storeId: string;
@@ -37,6 +39,31 @@ export interface CategoryInfo {
   name: string;
   slug: string;
   children?: CategoryInfo[];
+}
+
+export interface StoreInfo {
+  id: string;
+  name: string;
+  address: string;
+  region: string;
+  latitude: number;
+  longitude: number;
+  onlineActive: boolean;
+  physicalActive: boolean;
+}
+
+export interface StoreApiResponse {
+  id: string;
+  name: string;
+  banner: string;
+  address: string;
+  region: string;
+  clickAndCollect: boolean;
+  delivery: boolean;
+  latitude: number;
+  longitude: number;
+  onlineActive: boolean;
+  physicalActive: boolean;
 }
 
 export interface SearchQuery {
@@ -144,6 +171,19 @@ export function parseProductFromApi(raw: Record<string, unknown>): Product {
     promoDescription: bestPromo?.description as string | undefined,
     promoRequiresCard: bestPromo?.cardDependencyFlag as boolean | undefined,
     promoLimit: bestPromo?.maxQuantity as number | undefined,
+  };
+}
+
+export function parseStoreFromApi(raw: StoreApiResponse): StoreInfo {
+  return {
+    id: raw.id,
+    name: raw.name,
+    address: raw.address,
+    region: raw.region,
+    latitude: raw.latitude,
+    longitude: raw.longitude,
+    onlineActive: raw.onlineActive,
+    physicalActive: raw.physicalActive,
   };
 }
 

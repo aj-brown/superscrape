@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseProductFromApi, toCategorySlug } from '../src/utils';
+import { parseProductFromApi, toCategorySlug, parseStoreFromApi } from '../src/utils';
+import type { StoreApiResponse } from '../src/utils';
 
 describe('parseProductFromApi', () => {
   const makeRawProduct = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
@@ -161,5 +162,54 @@ describe('toCategorySlug', () => {
   it('converts to lowercase', () => {
     expect(toCategorySlug('PANTRY')).toBe('pantry');
     expect(toCategorySlug('World Foods')).toBe('world-foods');
+  });
+});
+
+describe('parseStoreFromApi', () => {
+  const makeRawStore = (overrides: Partial<StoreApiResponse> = {}): StoreApiResponse => ({
+    id: '60928d93-06fa-4d8f-92a6-8c359e7e846d',
+    name: 'New World Metro Auckland',
+    banner: 'MNW',
+    address: '123 Queen St, Auckland',
+    region: 'NI',
+    clickAndCollect: true,
+    delivery: true,
+    latitude: -36.848461,
+    longitude: 174.763336,
+    onlineActive: true,
+    physicalActive: true,
+    ...overrides,
+  });
+
+  it('parses store API response correctly', () => {
+    const raw = makeRawStore();
+    const result = parseStoreFromApi(raw);
+
+    expect(result.id).toBe('60928d93-06fa-4d8f-92a6-8c359e7e846d');
+    expect(result.name).toBe('New World Metro Auckland');
+    expect(result.address).toBe('123 Queen St, Auckland');
+    expect(result.region).toBe('NI');
+    expect(result.latitude).toBe(-36.848461);
+    expect(result.longitude).toBe(174.763336);
+    expect(result.onlineActive).toBe(true);
+    expect(result.physicalActive).toBe(true);
+  });
+
+  it('excludes non-essential fields from output', () => {
+    const raw = makeRawStore();
+    const result = parseStoreFromApi(raw);
+
+    // These fields are in the API response but not in StoreInfo
+    expect(result).not.toHaveProperty('banner');
+    expect(result).not.toHaveProperty('clickAndCollect');
+    expect(result).not.toHaveProperty('delivery');
+  });
+
+  it('handles stores with different activity states', () => {
+    const onlineOnly = makeRawStore({ onlineActive: true, physicalActive: false });
+    const result = parseStoreFromApi(onlineOnly);
+
+    expect(result.onlineActive).toBe(true);
+    expect(result.physicalActive).toBe(false);
   });
 });
