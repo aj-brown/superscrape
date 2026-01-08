@@ -26,7 +26,7 @@ vi.mock('../../src/storage/repository', () => ({
 }));
 
 describe('Multi-Category Integration', () => {
-  const categoriesPath = './docs/categories.json';
+  const categoriesPath = './categories.json';
 
   it('dry-run lists categories without scraping', async () => {
     // Parse CLI args for dry-run

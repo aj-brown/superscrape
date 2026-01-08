@@ -26,5 +26,9 @@ logs/
 *.log
 npm-debug.log*
 
+# Data and output
+.test-data/
+data/
+
 # Camoufox cache
 .camoufox/

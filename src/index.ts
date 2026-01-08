@@ -5,7 +5,7 @@ import { parseCategories, selectCategories, type CategoryNode, type FlatCategory
 import { MultiCategoryScraper } from './multi-scraper';
 import { initDatabase, getIncompleteRun, getRunStatus } from './storage';
 
-const CATEGORIES_PATH = './docs/categories.json';
+const CATEGORIES_PATH = './categories.json';
 
 async function main() {
   // Parse CLI arguments
