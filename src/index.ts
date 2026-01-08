@@ -3,8 +3,10 @@ import * as path from 'path';
 import { parseCliArgs, printUsage } from './cli';
 import { parseCategories, selectCategories, type CategoryNode } from './categories';
 import { MultiCategoryScraper } from './multi-scraper';
+import { NewWorldScraper } from './scraper';
 import { initDatabase, getDatabaseTotals, upsertStore } from './storage';
 import { resolveResumeState } from './resume';
+import { formatStoresTable } from './stores';
 
 const CATEGORIES_PATH = './categories.json';
 
@@ -21,6 +23,29 @@ async function main() {
 
   if (options.help) {
     printUsage();
+    return;
+  }
+
+  // Handle --list-stores: fetch and display stores, then exit
+  if (options.listStores) {
+    console.log('🏪 Fetching available stores...\n');
+
+    const scraper = new NewWorldScraper({ headless: options.headless });
+    try {
+      await scraper.initialize();
+      const stores = await scraper.getStores();
+
+      console.log(formatStoresTable(stores));
+      console.log(`\nTotal: ${stores.length} stores`);
+    } catch (error) {
+      console.error(
+        '❌ Failed to fetch stores:',
+        error instanceof Error ? error.message : String(error)
+      );
+      process.exit(1);
+    } finally {
+      await scraper.close();
+    }
     return;
   }
 

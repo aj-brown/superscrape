@@ -90,6 +90,18 @@ describe('parseCliArgs', () => {
     expect(result.logLevel).toBe('debug');
   });
 
+  it('--list-stores sets listStores flag', () => {
+    const result = parseCliArgs(['--list-stores']);
+
+    expect(result.listStores).toBe(true);
+  });
+
+  it('listStores defaults to false', () => {
+    const result = parseCliArgs([]);
+
+    expect(result.listStores).toBe(false);
+  });
+
   it('--config sets configPath', () => {
     const result = parseCliArgs(['--config', 'my-config.json']);
 

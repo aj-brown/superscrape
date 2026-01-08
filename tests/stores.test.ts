@@ -7,6 +7,7 @@ import {
   sampleStores,
   findStoreByName,
   findStoresByName,
+  formatStoresTable,
 } from '../src/stores';
 import type { StoreInfo } from '../src/utils';
 
@@ -205,6 +206,63 @@ describe('stores utilities', () => {
     it('handles empty stores array', () => {
       const results = findStoresByName([], 'Metro');
       expect(results).toHaveLength(0);
+    });
+  });
+
+  describe('formatStoresTable', () => {
+    it('formats stores grouped by region', () => {
+      const stores = [
+        makeStore('id-1', 'New World Metro', { region: 'NI' }),
+        makeStore('id-2', 'New World Thorndon', { region: 'NI' }),
+      ];
+
+      const output = formatStoresTable(stores);
+
+      expect(output).toContain('New World Metro');
+      expect(output).toContain('New World Thorndon');
+      expect(output).toContain('id-1');
+      expect(output).toContain('[NI]');
+    });
+
+    it('sorts stores alphabetically within region', () => {
+      const stores = [
+        makeStore('id-z', 'Zebra Store', { region: 'NI' }),
+        makeStore('id-a', 'Alpha Store', { region: 'NI' }),
+      ];
+
+      const output = formatStoresTable(stores);
+
+      const alphaIndex = output.indexOf('Alpha Store');
+      const zebraIndex = output.indexOf('Zebra Store');
+      expect(alphaIndex).toBeLessThan(zebraIndex);
+    });
+
+    it('groups multiple regions', () => {
+      const stores = [
+        makeStore('id-1', 'North Store', { region: 'NI' }),
+        makeStore('id-2', 'South Store', { region: 'SI' }),
+      ];
+
+      const output = formatStoresTable(stores);
+
+      expect(output).toContain('[NI]');
+      expect(output).toContain('[SI]');
+    });
+
+    it('handles empty stores array', () => {
+      const output = formatStoresTable([]);
+
+      expect(output).toContain('Name');
+      expect(output).toContain('ID');
+    });
+
+    it('includes header row', () => {
+      const stores = [makeStore('id-1', 'Test Store')];
+
+      const output = formatStoresTable(stores);
+
+      expect(output).toContain('Name');
+      expect(output).toContain('ID');
     });
   });
 });

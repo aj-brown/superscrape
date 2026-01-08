@@ -56,6 +56,7 @@ export function mergeConfigWithCli(cli: CliOptions, config: Config | undefined):
     maxPages: config.maxPages ?? cli.maxPages,
     headless: config.headless ?? cli.headless,
     dryRun: config.dryRun ?? cli.dryRun,
+    listStores: cli.listStores,
     help: cli.help,
     logFormat: config.logFormat ?? cli.logFormat,
     logLevel: config.logLevel ?? cli.logLevel,

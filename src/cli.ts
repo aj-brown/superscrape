@@ -7,6 +7,7 @@ export interface CliOptions {
   maxPages: number;
   headless: boolean;
   dryRun: boolean;
+  listStores: boolean;
   help: boolean;
   logFormat: LogFormat;
   logLevel: LogLevel;
@@ -49,6 +50,10 @@ export function parseCliArgs(args: string[]): CliOptions {
         default: false,
       },
       'dry-run': {
+        type: 'boolean',
+        default: false,
+      },
+      'list-stores': {
         type: 'boolean',
         default: false,
       },
@@ -105,6 +110,7 @@ export function parseCliArgs(args: string[]): CliOptions {
     maxPages: parseInt(values.pages as string, 10),
     headless,
     dryRun: values['dry-run'] as boolean,
+    listStores: values['list-stores'] as boolean,
     help: values.help as boolean,
     logFormat: values['log-format'] as LogFormat,
     logLevel: values['log-level'] as LogLevel,
@@ -130,6 +136,7 @@ Options:
   --headless          Run headless (default: true)
   --no-headless       Run with visible browser
   --dry-run           List categories without scraping
+  --list-stores       List all available stores and exit
   --log-format        Log format: text or json (default: text)
   --log-level         Log level: debug, info, warn, error (default: info)
   --config            Path to JSON config file

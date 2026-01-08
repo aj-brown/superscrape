@@ -81,3 +81,43 @@ export function findStoresByName(stores: StoreInfo[], name: string): StoreInfo[]
   const searchLower = name.toLowerCase();
   return stores.filter((s) => s.name.toLowerCase().includes(searchLower));
 }
+
+/**
+ * Format stores as a table for console output.
+ * Groups by region, sorts alphabetically within each region.
+ */
+export function formatStoresTable(stores: StoreInfo[]): string {
+  // Group by region
+  const byRegion = new Map<string, StoreInfo[]>();
+  for (const store of stores) {
+    const region = store.region || 'Unknown';
+    if (!byRegion.has(region)) {
+      byRegion.set(region, []);
+    }
+    byRegion.get(region)!.push(store);
+  }
+
+  // Sort stores within each region
+  for (const storeList of byRegion.values()) {
+    storeList.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // Calculate column width
+  const nameWidth = Math.max(4, ...stores.map((s) => s.name.length));
+  const idWidth = 36;
+
+  const lines: string[] = [];
+  lines.push('Name'.padEnd(nameWidth) + '  ' + 'ID');
+  lines.push('-'.repeat(nameWidth) + '  ' + '-'.repeat(idWidth));
+
+  // Sort regions and format
+  const sortedRegions = [...byRegion.keys()].sort();
+  for (const region of sortedRegions) {
+    lines.push(`\n[${region}]`);
+    for (const store of byRegion.get(region)!) {
+      lines.push(`  ${store.name.padEnd(nameWidth)}  ${store.id}`);
+    }
+  }
+
+  return lines.join('\n');
+}

@@ -510,10 +510,10 @@ npm run dev -- --resume --store "New World Metro Auckland"
 ---
 
 ### Phase 3: CLI `--list-stores`
-- [ ] Add `--list-stores` CLI flag
-- [ ] Fetch and display all stores in table format
-- [ ] Show store name, region, and ID
-- [ ] Exit after listing (no scrape)
+- [x] Add `--list-stores` CLI flag
+- [x] Fetch and display all stores in table format
+- [x] Show store name, region, and ID
+- [x] Exit after listing (no scrape)
 
 **Acceptance Criteria:**
 - `npm run dev -- --list-stores` prints store table and exits
