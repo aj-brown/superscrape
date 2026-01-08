@@ -98,14 +98,61 @@ This means we can query products for any store **without** needing to call the P
 3. **CLI has no store selection**
    - No `--store` or `--all-stores` options
 
+4. **Run/resume system is store-unaware**
+   - `category_runs` tracks `(run_id, category_slug)` only
+   - Cannot track which stores have been completed
+   - Resume would not know which store+category pairs remain
+
+## Current Run/Resume Architecture
+
+### Existing Tables
+
+```sql
+-- Tracks overall scrape runs
+CREATE TABLE scrape_runs (
+  id            INTEGER PRIMARY KEY,
+  started_at    TEXT NOT NULL,
+  completed_at  TEXT,
+  status        TEXT NOT NULL DEFAULT 'in_progress'  -- 'in_progress', 'completed'
+);
+
+-- Tracks per-category progress within a run
+CREATE TABLE category_runs (
+  id            INTEGER PRIMARY KEY,
+  run_id        INTEGER NOT NULL REFERENCES scrape_runs(id),
+  category_slug TEXT NOT NULL,  -- e.g., "Pantry > Canned Foods"
+  status        TEXT NOT NULL DEFAULT 'pending',  -- 'pending', 'in_progress', 'completed', 'failed'
+  last_page     INTEGER,
+  product_count INTEGER,
+  error         TEXT,
+  UNIQUE(run_id, category_slug)
+);
+```
+
+### Current Resume Flow
+
+1. `resolveResumeState()` checks for incomplete runs
+2. `--resume` flag finds last in_progress run
+3. `--run-id X` resumes specific run
+4. Returns only pending/failed categories to re-scrape
+5. Completed categories are skipped
+
+### Multi-Store Impact
+
+With 144 stores × 140 categories = 20,160 store+category combinations per full run:
+
+- **Granularity change**: Track `(run_id, store_id, category_slug)` instead of `(run_id, category_slug)`
+- **Run scope**: A single run spans all selected stores
+- **Resume precision**: Can resume mid-store (e.g., store A done, store B partially done, store C not started)
+
 ## Proposed Changes
 
 ### Phase 1: Database Schema Changes
 
-Add store tracking to the database:
+Fresh schema with store support (no migration needed - start with new database):
 
 ```sql
--- New table: stores (cache store metadata)
+-- Store metadata cache
 CREATE TABLE IF NOT EXISTS stores (
   store_id    TEXT PRIMARY KEY,
   name        TEXT NOT NULL,
@@ -116,14 +163,61 @@ CREATE TABLE IF NOT EXISTS stores (
   last_synced TEXT NOT NULL
 );
 
--- Modify price_snapshots to include store
-ALTER TABLE price_snapshots ADD COLUMN store_id TEXT;
+-- Master product data (store-agnostic)
+CREATE TABLE IF NOT EXISTS products (
+  product_id      TEXT PRIMARY KEY,
+  name            TEXT NOT NULL,
+  brand           TEXT,
+  category        TEXT,
+  subcategory     TEXT,
+  category_level2 TEXT,
+  origin          TEXT,
+  sale_type       TEXT,
+  first_seen      TEXT NOT NULL,
+  last_seen       TEXT NOT NULL
+);
+
+-- Price history (per-store)
+CREATE TABLE IF NOT EXISTS price_snapshots (
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id          TEXT NOT NULL REFERENCES products(product_id),
+  store_id            TEXT NOT NULL REFERENCES stores(store_id),  -- NEW: required
+  scraped_at          TEXT NOT NULL,
+  price               REAL NOT NULL,
+  -- ... other price fields ...
+  UNIQUE(product_id, store_id, scraped_at)  -- Changed from (product_id, scraped_at)
+);
+
+CREATE INDEX IF NOT EXISTS idx_snapshots_product ON price_snapshots(product_id);
 CREATE INDEX IF NOT EXISTS idx_snapshots_store ON price_snapshots(store_id);
+CREATE INDEX IF NOT EXISTS idx_snapshots_date ON price_snapshots(scraped_at);
+
+-- Run tracking (unchanged)
+CREATE TABLE IF NOT EXISTS scrape_runs (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  started_at    TEXT NOT NULL,
+  completed_at  TEXT,
+  status        TEXT NOT NULL DEFAULT 'in_progress'
+);
+
+-- Category run tracking (per-store)
+CREATE TABLE IF NOT EXISTS category_runs (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  run_id        INTEGER NOT NULL REFERENCES scrape_runs(id),
+  store_id      TEXT NOT NULL REFERENCES stores(store_id),  -- NEW: required
+  category_slug TEXT NOT NULL,
+  status        TEXT NOT NULL DEFAULT 'pending',
+  last_page     INTEGER,
+  product_count INTEGER,
+  error         TEXT,
+  UNIQUE(run_id, store_id, category_slug)  -- Changed from (run_id, category_slug)
+);
+
+CREATE INDEX IF NOT EXISTS idx_category_runs_run ON category_runs(run_id);
+CREATE INDEX IF NOT EXISTS idx_category_runs_store ON category_runs(store_id);
 ```
 
-**Migration Strategy:**
-- Existing snapshots get `store_id = NULL` (or the default store ID)
-- New snapshots require `store_id`
+**Decision:** Start fresh with new database. Existing data can be deleted.
 
 ### Phase 2: Store API Client
 
@@ -224,26 +318,131 @@ function comparePricesAcrossStores(dbPath: string, productId: string): StorePric
 
 ## Data Model Considerations
 
-### Unique Constraint Change
+### Unique Constraint Changes
 
-Current: `UNIQUE(product_id, scraped_at)`
-New: `UNIQUE(product_id, store_id, scraped_at)`
+**price_snapshots:**
+- Current: `UNIQUE(product_id, scraped_at)`
+- New: `UNIQUE(product_id, store_id, scraped_at)`
+- Allows same product to have different prices at different stores on same timestamp
 
-This allows the same product to have different prices at different stores on the same scrape timestamp.
+**category_runs:**
+- Current: `UNIQUE(run_id, category_slug)`
+- New: `UNIQUE(run_id, store_id, category_slug)`
+- Allows tracking progress per store+category combination
 
 ### Product Identity
 
 Products have the same `productId` across all stores. Only pricing and availability differ. The `products` table remains store-agnostic (master data), while `price_snapshots` becomes store-specific.
 
+## Resume System Changes
+
+### Updated Types
+
+```typescript
+// src/storage/types.ts
+
+interface CategoryRunRecord {
+  storeId: string;        // NEW
+  categorySlug: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  lastPage?: number;
+  productCount?: number;
+  error?: string;
+}
+
+interface IncompleteRun {
+  id: number;
+  startedAt: string;
+  pendingItems: Array<{   // Changed from pendingCategories: string[]
+    storeId: string;
+    categorySlug: string;
+  }>;
+}
+```
+
+### Updated Resume Flow
+
+```typescript
+// src/resume.ts - resolveResumeState() changes
+
+interface ResumeResult {
+  runId?: number;
+  itemsToScrape: Array<{    // Changed from categoriesToScrape
+    store: StoreInfo;
+    category: FlatCategory;
+  }>;
+  isResuming: boolean;
+  message?: string;
+  allCompleted?: boolean;
+}
+
+// Resume logic:
+// 1. Find incomplete run (same as before)
+// 2. Get pending (store_id, category_slug) pairs from category_runs
+// 3. Match against selected stores × selected categories
+// 4. Return only pending combinations
+```
+
+### Run Creation Changes
+
+```typescript
+// src/storage/repository.ts - createRun() changes
+
+function createRun(
+  dbPath: string,
+  stores: StoreInfo[],      // NEW parameter
+  categories: string[]
+): number {
+  // Creates run record
+  // Creates category_runs for each (store, category) combination
+  // Total rows = stores.length × categories.length
+}
+```
+
+### Progress Tracking
+
+With multi-store, progress becomes two-dimensional:
+
+```
+Run #5 Progress:
+├── New World Metro Auckland (3/140 categories)
+│   ├── Pantry > Canned Foods ✓
+│   ├── Pantry > Pasta & Rice ✓
+│   ├── Pantry > Baking (in progress)
+│   └── ... 137 pending
+├── New World Thorndon (0/140 categories)
+│   └── ... 140 pending
+└── New World Lambton Quay (0/140 categories)
+    └── ... 140 pending
+
+Overall: 3/420 completed (0.7%)
+```
+
+### Resume CLI Behavior
+
+```bash
+# Resume last incomplete run (picks up where it left off)
+npm run dev -- --resume
+
+# Resume specific run
+npm run dev -- --run-id 5
+
+# Resume but only for specific store (filters pending items)
+npm run dev -- --resume --store "New World Metro Auckland"
+```
+
 ## Implementation Order
 
-1. **Schema migration** - Add `store_id` column, update constraints
-2. **Store API client** - Fetch and cache store list
-3. **CLI `--list-stores`** - Quick validation
-4. **Scraper `storeId` flow** - Pass through to DB save
-5. **CLI `--store` option** - Single store selection
-6. **CLI `--all-stores`** - Full multi-store support
-7. **Progress/reporting** - Show per-store progress
+1. **Database schema** - Fresh schema with `store_id` in `price_snapshots` and `category_runs`
+2. **Store API client** - Fetch stores from API, cache in `stores` table
+3. **CLI `--list-stores`** - Quick validation that store fetching works
+4. **Update repository** - Add `store_id` to `saveProducts()`, `createRun()`, `updateCategoryRun()`
+5. **Update resume system** - Change `resolveResumeState()` to work with (store, category) pairs
+6. **Scraper `storeId` flow** - Pass storeId through scraper to DB
+7. **CLI `--store` option** - Single/multiple store selection
+8. **CLI `--all-stores`** - Full multi-store support
+9. **CLI `--sample-stores`** - Random sampling for testing
+10. **Progress/reporting** - Show per-store progress during scrape
 
 ## Scope Decisions
 
@@ -265,6 +464,11 @@ Products have the same `productId` across all stores. Only pricing and availabil
    - **Decision:** Add `--sample-stores N` flag for testing
    - Randomly selects N stores from the full list
    - Useful for development and CI runs
+
+5. **Resume + store filtering interaction?**
+   - **Decision:** `--resume --store X` filters pending items to store X only
+   - Allows partial resume (e.g., finish just one store from a multi-store run)
+   - Remaining stores stay pending for future resume
 
 ## Performance Considerations
 
