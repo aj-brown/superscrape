@@ -12,6 +12,7 @@ import {
   type SearchQuery,
 } from './utils';
 import { createReliabilityWrapper, type ReliabilityConfig } from './reliability';
+import { isTokenExpiringSoon } from './token';
 
 export interface ScraperConfig {
   headless?: boolean;
@@ -34,6 +35,8 @@ export class NewWorldScraper {
   private config: ScraperConfig;
   private page: Page | null = null;
   private authorizationToken: string | null = null;
+  private tokenAcquiredAt: number | null = null;
+  private isRefreshing: boolean = false;
   private reliability: ReturnType<typeof createReliabilityWrapper>;
 
   constructor(config: ScraperConfig = {}) {
@@ -68,11 +71,15 @@ export class NewWorldScraper {
     // Capture Authorization token from outgoing API requests
     this.page.on('request', (request: Request) => {
       const url = request.url();
-      if (url.includes('api-prod.newworld.co.nz') && !this.authorizationToken) {
+      if (url.includes('api-prod.newworld.co.nz')) {
         const authHeader = request.headers()['authorization'];
         if (authHeader?.startsWith('Bearer ')) {
+          const isNewToken = this.authorizationToken !== authHeader;
           this.authorizationToken = authHeader;
-          console.log('🔑 Captured authorization token');
+          this.tokenAcquiredAt = Date.now();
+          if (isNewToken) {
+            console.log('🔑 Captured authorization token');
+          }
         }
       }
     });
@@ -106,12 +113,68 @@ export class NewWorldScraper {
     console.log(`✅ Scraper initialized with store ID: ${this.storeId}`);
   }
 
+  /**
+   * Refresh the authorization token by re-navigating to trigger get-current-user.
+   * This is called proactively before the token expires.
+   */
+  private async refreshToken(): Promise<void> {
+    if (this.isRefreshing) {
+      // Wait for in-progress refresh
+      while (this.isRefreshing) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      return;
+    }
+
+    this.isRefreshing = true;
+    console.log('🔄 Refreshing authorization token...');
+
+    try {
+      // Clear current token to allow capture of new one
+      this.authorizationToken = null;
+      this.tokenAcquiredAt = null;
+
+      // Navigate to specials page to trigger get-current-user API call
+      await this.page!.goto('https://www.newworld.co.nz/shop/specials?pg=1', {
+        waitUntil: 'networkidle',
+        timeout: 60000,
+      });
+
+      // Refresh cookies as they may have changed
+      this.cookies = await this.page!.context().cookies();
+
+      if (!this.authorizationToken) {
+        throw new Error('Failed to capture new authorization token during refresh');
+      }
+      console.log('✅ Token refreshed successfully');
+    } finally {
+      this.isRefreshing = false;
+    }
+  }
+
+  /**
+   * Ensure the token is valid before making API calls.
+   * Proactively refreshes if token is expiring soon.
+   */
+  private async ensureValidToken(): Promise<void> {
+    if (isTokenExpiringSoon(this.tokenAcquiredAt)) {
+      await this.refreshToken();
+    }
+  }
+
   private async fetchProductsFromApi(query: SearchQuery): Promise<{
     products: Product[];
     totalHits: number;
   }> {
-    if (!this.page || !this.authorizationToken || !this.storeId) {
+    if (!this.page || !this.storeId) {
       throw new Error('Scraper not initialized. Call initialize() first.');
+    }
+
+    // Ensure token is valid before making the request
+    await this.ensureValidToken();
+
+    if (!this.authorizationToken) {
+      throw new Error('No valid authorization token available');
     }
 
     const payload = buildProductSearchPayload(query);
@@ -121,6 +184,33 @@ export class NewWorldScraper {
       data: payload,
       headers,
     });
+
+    // Handle token expiry mid-request (401 Unauthorized)
+    if (response.status() === 401) {
+      console.log('⚠️ Token expired mid-request, refreshing...');
+      await this.refreshToken();
+
+      // Retry the request once with fresh token
+      const retryHeaders = buildApiHeaders(this.cookies, this.authorizationToken!);
+      const retryResponse = await this.page.context().request.post(PRODUCTS_API_URL, {
+        data: payload,
+        headers: retryHeaders,
+      });
+
+      if (!retryResponse.ok()) {
+        throw new Error(`API request failed after token refresh: ${retryResponse.status()}`);
+      }
+
+      const data = (await retryResponse.json()) as {
+        products?: Array<Record<string, unknown>>;
+        totalHits?: number;
+      };
+
+      return {
+        products: (data.products || []).map(parseProductFromApi),
+        totalHits: data.totalHits || 0,
+      };
+    }
 
     if (!response.ok()) {
       throw new Error(`API request failed: ${response.status()} ${response.statusText()}`);
@@ -138,8 +228,15 @@ export class NewWorldScraper {
   }
 
   async getCategories(): Promise<CategoryInfo[]> {
-    if (!this.page || !this.authorizationToken) {
+    if (!this.page) {
       throw new Error('Scraper not initialized. Call initialize() first.');
+    }
+
+    // Ensure token is valid before making the request
+    await this.ensureValidToken();
+
+    if (!this.authorizationToken) {
+      throw new Error('No valid authorization token available');
     }
 
     console.log('📂 Fetching categories from API...');
