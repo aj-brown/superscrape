@@ -63,6 +63,9 @@ async function main() {
   initDatabase(dbPath);
   console.log(`✅ Database ready at ${dbPath}\n`);
 
+  // Capture database totals before scraping
+  const dbTotalsBefore = getDatabaseTotals(dbPath);
+
   // Handle resume mode
   let runId: number | undefined;
   let categoriesToScrape: FlatCategory[] = selectedCategories;
@@ -145,12 +148,23 @@ async function main() {
     }
   }
 
-  // Print database totals
-  const dbTotals = getDatabaseTotals(dbPath);
+  // Print database totals with before/after comparison
+  const dbTotalsAfter = getDatabaseTotals(dbPath);
+  const formatChange = (before: number, after: number) => {
+    const diff = after - before;
+    return diff >= 0 ? `+${diff}` : `${diff}`;
+  };
   console.log('\n=== DATABASE TOTALS ===');
-  console.log(`Total products in database: ${dbTotals.totalProducts}`);
-  console.log(`Total price snapshots: ${dbTotals.totalSnapshots}`);
-  console.log(`Products on promo: ${dbTotals.productsOnPromo}`);
+  console.log('                  Before    After    Change');
+  console.log(
+    `Products:     ${dbTotalsBefore.totalProducts.toString().padStart(10)}${dbTotalsAfter.totalProducts.toString().padStart(9)}${formatChange(dbTotalsBefore.totalProducts, dbTotalsAfter.totalProducts).padStart(10)}`
+  );
+  console.log(
+    `Snapshots:    ${dbTotalsBefore.totalSnapshots.toString().padStart(10)}${dbTotalsAfter.totalSnapshots.toString().padStart(9)}${formatChange(dbTotalsBefore.totalSnapshots, dbTotalsAfter.totalSnapshots).padStart(10)}`
+  );
+  console.log(
+    `On promo:     ${dbTotalsBefore.productsOnPromo.toString().padStart(10)}${dbTotalsAfter.productsOnPromo.toString().padStart(9)}${formatChange(dbTotalsBefore.productsOnPromo, dbTotalsAfter.productsOnPromo).padStart(10)}`
+  );
 
   console.log('\n✅ Scraping complete!');
 }
