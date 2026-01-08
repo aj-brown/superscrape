@@ -1,6 +1,6 @@
 ---
-description: Commit changes with conventional commits format, push to remote, and create PR
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git log:*), Bash(git branch:*), Bash(gh pr:*)
+description: Commit changes with conventional commits format and push to remote
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git log:*), Bash(git branch:*)
 ---
 
 ## Context
@@ -19,9 +19,9 @@ allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git c
    - Types: feat, fix, refactor, docs, test, chore, perf, style, build, ci
    - Format: `type(scope): description` or `type: description`
 4. **Push to remote** on the current branch
-5. **Create a PR** using `gh pr create` with a clear title and description
 
 Follow conventional commit guidelines:
+
 - Use imperative mood ("add" not "added")
 - Keep subject line under 72 characters
 - Reference issues if applicable
