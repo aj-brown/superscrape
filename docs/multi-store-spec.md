@@ -221,7 +221,32 @@ CREATE INDEX IF NOT EXISTS idx_category_runs_store ON category_runs(store_id);
 
 ### Phase 2: Store API Client
 
-New module: `src/stores.ts`
+**Design Decision:** Add `getStores()` method to `NewWorldScraper` class, following the existing `getCategories()` pattern. This keeps API interaction logic centralized and reuses the captured auth token and page context.
+
+**Scraper addition** (`src/scraper.ts`):
+
+```typescript
+const STORES_API_URL = 'https://api-prod.newworld.co.nz/v1/edge/store';
+
+// Add to NewWorldScraper class
+async getStores(): Promise<StoreInfo[]> {
+  await this.ensureValidToken();
+  const headers = buildApiHeaders(this.cookies, this.authorizationToken!);
+
+  const response = await this.reliability.execute(async () => {
+    return this.page!.context().request.get(STORES_API_URL, { headers });
+  });
+
+  if (!response.ok()) {
+    throw new Error(`Stores API failed: ${response.status()}`);
+  }
+
+  const data = await response.json() as { stores?: StoreApiResponse[] };
+  return (data.stores || []).map(parseStoreFromApi);
+}
+```
+
+**Utility module** (`src/stores.ts`) - pure functions, no API calls:
 
 ```typescript
 interface StoreInfo {
@@ -235,29 +260,40 @@ interface StoreInfo {
   physicalActive: boolean;
 }
 
-// Fetch all stores from API
-async function fetchStores(page: Page, token: string): Promise<StoreInfo[]>
+// Parse API response to StoreInfo (used by scraper)
+function parseStoreFromApi(raw: StoreApiResponse): StoreInfo
 
 // Save stores to database cache
 function syncStoresToDb(dbPath: string, stores: StoreInfo[]): void
 
 // Get random sample of stores for testing
 function sampleStores(stores: StoreInfo[], count: number): StoreInfo[]
+
+// Find store by name (fuzzy match for CLI)
+function findStoreByName(stores: StoreInfo[], name: string): StoreInfo | null
 ```
 
-### Phase 3: Scraper Modifications
+### Phase 3: Scraper storeId Flow
 
-**Option A: Switch store mid-scrape (lightweight)**
-- Add `setStore(storeId)` method to `NewWorldScraper`
-- For each store, call setStore then scrape categories
-- Products already track `storeId` in payload, just needs to flow to DB
+The product search API already accepts `storeId` in the payload (see `buildProductSearchPayload()`). No session state change is needed - just pass the target `storeId` through the scrape methods.
 
-**Option B: Store per scraper instance (isolated)**
-- Each scraper instance locks to one store
-- For multi-store, create multiple scrapers
-- Better isolation, slightly more resource usage
+**Changes:**
+- `scrapeCategory()` already uses `this.storeId` in the query
+- Add `setStoreId(id: string)` method to switch stores between scrapes
+- The `storeId` flows: CLI → scraper → `fetchProductsFromApi()` → `saveProducts()`
 
-**Recommendation:** Option A is simpler since the product search already accepts storeId as a parameter - no actual "session state" change needed.
+```typescript
+// Add to NewWorldScraper class
+setStoreId(storeId: string): void {
+  this.storeId = storeId;
+}
+
+getStoreId(): string | null {
+  return this.storeId;
+}
+```
+
+**Note:** No need to call POST `/v1/edge/cart/store/{storeId}` - that's only for cart/checkout. Product queries accept storeId directly in the payload.
 
 ### Phase 4: CLI Changes
 
@@ -431,14 +467,196 @@ npm run dev -- --run-id 5
 npm run dev -- --resume --store "New World Metro Auckland"
 ```
 
+## Implementation Checklist
+
+### Phase 1: Database Schema
+- [ ] Create fresh schema with `stores` table
+- [ ] Add `store_id` column to `price_snapshots` table
+- [ ] Add `store_id` column to `category_runs` table
+- [ ] Update unique constraints for multi-store support
+- [ ] Add indexes for store-based queries
+
+**Acceptance Criteria:**
+- Schema creates successfully with `npm run dev` (auto-init)
+- `price_snapshots` accepts `(product_id, store_id, scraped_at)` as unique
+- `category_runs` accepts `(run_id, store_id, category_slug)` as unique
+
+**Tests:**
+- `repository.test.ts`: Insert same product with different store_ids succeeds
+- `repository.test.ts`: Insert duplicate (product_id, store_id, scraped_at) fails with constraint error
+
+---
+
+### Phase 2: Store API Client
+- [ ] Add `STORES_API_URL` constant to `src/utils.ts`
+- [ ] Add `StoreInfo` type and `parseStoreFromApi()` to `src/utils.ts`
+- [ ] Add `getStores()` method to `NewWorldScraper` (like `getCategories()`)
+- [ ] Create `src/stores.ts` with utility functions (no API calls)
+- [ ] Implement `syncStoresToDb()` - cache stores in database
+- [ ] Implement `sampleStores()` - random selection for testing
+- [ ] Implement `findStoreByName()` - fuzzy match for CLI
+
+**Acceptance Criteria:**
+- `scraper.getStores()` returns array of 144 stores with required fields
+- `syncStoresToDb()` upserts stores (idempotent)
+- `sampleStores(stores, 5)` returns exactly 5 random stores
+
+**Tests:**
+- `scraper.test.ts`: Mock stores API response, verify `getStores()` parsing
+- `stores.test.ts`: `sampleStores` returns correct count, no duplicates
+- `stores.test.ts`: `syncStoresToDb` handles upsert correctly
+- `stores.test.ts`: `findStoreByName` matches partial names
+
+---
+
+### Phase 3: CLI `--list-stores`
+- [ ] Add `--list-stores` CLI flag
+- [ ] Fetch and display all stores in table format
+- [ ] Show store name, region, and ID
+- [ ] Exit after listing (no scrape)
+
+**Acceptance Criteria:**
+- `npm run dev -- --list-stores` prints store table and exits
+- Output includes store name, region, ID columns
+- Works without any other flags
+
+**Tests:**
+- Integration test: CLI exits with code 0, output contains expected store names
+
+---
+
+### Phase 4: Repository Updates
+- [ ] Update `saveProducts()` to accept `storeId` parameter
+- [ ] Update `createRun()` to accept stores array
+- [ ] Update `updateCategoryRun()` to use `(run_id, store_id, category_slug)`
+- [ ] Update `getCategoryRunStatus()` for store-aware queries
+- [ ] Add `getProductsByStore()` query
+- [ ] Add `comparePricesAcrossStores()` query
+
+**Acceptance Criteria:**
+- `saveProducts(db, products, snapshots, storeId)` inserts with store_id
+- `createRun(db, stores, categories)` creates N×M category_run rows
+- All existing tests pass with updated signatures
+
+**Tests:**
+- `repository.test.ts`: `saveProducts` inserts correct store_id
+- `repository.test.ts`: `createRun` with 2 stores × 3 categories = 6 rows
+- `repository.test.ts`: `getCategoryRunStatus` filters by store_id
+
+---
+
+### Phase 5: Resume System Updates
+- [ ] Update `CategoryRunRecord` type with `storeId` field
+- [ ] Update `IncompleteRun.pendingItems` to `Array<{storeId, categorySlug}>`
+- [ ] Update `ResumeResult.itemsToScrape` to include store info
+- [ ] Update `resolveResumeState()` for (store, category) pairs
+- [ ] Update `getPendingCategories()` to return store+category tuples
+
+**Acceptance Criteria:**
+- Resume finds pending (store, category) pairs, not just categories
+- `--resume` picks up mid-store (store A done, store B partial)
+- `--resume --store X` filters to only store X's pending items
+
+**Tests:**
+- `resume.test.ts`: Incomplete run with 2 stores, 1 partially done → correct pending items
+- `resume.test.ts`: Resume with store filter returns only that store's pending
+- `resume.test.ts`: All (store, category) pairs completed → `allCompleted: true`
+
+---
+
+### Phase 6: Scraper storeId Flow
+- [ ] Add `setStoreId(id)` and `getStoreId()` methods to `NewWorldScraper`
+- [ ] Update `scrapeCategory()` to return `storeId` with products
+- [ ] Pass `storeId` from scraper through to `saveProducts()`
+- [ ] Verify `buildProductSearchPayload()` uses the correct `storeId`
+
+**Acceptance Criteria:**
+- `scraper.setStoreId(id)` switches store without re-initialization
+- `scraper.getStoreId()` returns current store
+- Products saved with correct `store_id` in database
+- Price snapshots associated with correct store
+
+**Tests:**
+- `scraper.test.ts`: `setStoreId` updates internal state
+- `scraper.test.ts`: Mock scrape with storeId → payload contains correct store filter
+- Integration: Scrape same category from 2 stores → both have records in DB
+
+---
+
+### Phase 7: CLI `--store` Option
+- [ ] Add `--store` flag (repeatable) for store name selection
+- [ ] Add `--store-id` flag for UUID selection
+- [ ] Validate store names/IDs against fetched stores
+- [ ] Error on invalid store name with suggestions
+
+**Acceptance Criteria:**
+- `--store "New World Metro Auckland"` scrapes only that store
+- `--store X --store Y` scrapes both stores
+- Invalid store name shows error with closest matches
+
+**Tests:**
+- CLI test: `--store "Invalid"` exits with error, suggests similar names
+- CLI test: `--store "New World Metro Auckland"` filters correctly
+
+---
+
+### Phase 8: CLI `--all-stores`
+- [ ] Add `--all-stores` flag
+- [ ] Fetch all 144 stores when flag is set
+- [ ] Iterate through stores in scrape loop
+- [ ] Show progress per store
+
+**Acceptance Criteria:**
+- `--all-stores` scrapes all 144 stores
+- Progress shows current store and overall completion
+- Can be combined with `--sample-stores` for subset
+
+**Tests:**
+- Integration: `--all-stores --dry-run` shows 144 stores queued
+
+---
+
+### Phase 9: CLI `--sample-stores`
+- [ ] Add `--sample-stores N` flag
+- [ ] Randomly select N stores from available stores
+- [ ] Seed RNG for reproducible tests (optional `--seed`)
+- [ ] Works with `--all-stores` only
+
+**Acceptance Criteria:**
+- `--all-stores --sample-stores 5` scrapes exactly 5 random stores
+- Different runs select different stores (unless seeded)
+- Error if used without `--all-stores`
+
+**Tests:**
+- CLI test: `--sample-stores 3` without `--all-stores` → error
+- CLI test: `--all-stores --sample-stores 3` → 3 stores selected
+
+---
+
+### Phase 10: Progress & Reporting
+- [ ] Update progress display for two-dimensional progress
+- [ ] Show per-store category completion
+- [ ] Show overall (store × category) completion percentage
+- [ ] Summary report at end with per-store stats
+
+**Acceptance Criteria:**
+- Progress shows: `Store 2/5: New World Metro (3/140 categories)`
+- Overall shows: `Overall: 143/700 (20.4%)`
+- Final summary lists products/store and any failures
+
+**Tests:**
+- Unit test: Progress formatter produces expected output format
+
+---
+
 ## Implementation Order
 
 1. **Database schema** - Fresh schema with `store_id` in `price_snapshots` and `category_runs`
-2. **Store API client** - Fetch stores from API, cache in `stores` table
+2. **Store API client** - Add `getStores()` to scraper (like `getCategories()`), utilities in `src/stores.ts`
 3. **CLI `--list-stores`** - Quick validation that store fetching works
 4. **Update repository** - Add `store_id` to `saveProducts()`, `createRun()`, `updateCategoryRun()`
 5. **Update resume system** - Change `resolveResumeState()` to work with (store, category) pairs
-6. **Scraper `storeId` flow** - Pass storeId through scraper to DB
+6. **Scraper `storeId` flow** - Add `setStoreId()`/`getStoreId()`, pass through to DB
 7. **CLI `--store` option** - Single/multiple store selection
 8. **CLI `--all-stores`** - Full multi-store support
 9. **CLI `--sample-stores`** - Random sampling for testing
@@ -496,3 +714,45 @@ npm run dev -- \
 # Full scrape of all 144 stores, all categories, 10 pages each
 npm run dev -- --all-stores --all --pages 10
 ```
+
+## Testing Strategy
+
+### Unit Tests
+| Module | File | Coverage |
+|--------|------|----------|
+| Store API | `stores.test.ts` | `fetchStores`, `syncStoresToDb`, `sampleStores` |
+| Repository | `repository.test.ts` | Multi-store `saveProducts`, `createRun`, constraints |
+| Resume | `resume.test.ts` | Store-aware `resolveResumeState`, filtering |
+| Progress | `progress.test.ts` | Two-dimensional progress formatting |
+
+### Integration Tests
+| Scenario | Command | Validates |
+|----------|---------|-----------|
+| List stores | `--list-stores` | API fetch, display format |
+| Single store | `--store "X" -c "Pantry" --pages 1` | Store selection, DB association |
+| Multi-store | `--store "X" --store "Y" --dry-run` | Multiple store handling |
+| Sample stores | `--all-stores --sample-stores 3 --dry-run` | Random selection |
+| Resume mid-store | Start multi-store, interrupt, `--resume` | Correct pending items |
+
+### End-to-End Acceptance Test
+
+**Scenario:** Full multi-store workflow with resume
+
+```bash
+# 1. Start 2-store scrape, interrupt after 1st store completes
+npm run dev -- --store "New World Metro Auckland" --store "New World Thorndon" -c "Pantry" --pages 1
+# (interrupt mid-second-store)
+
+# 2. Resume and verify only pending items scraped
+npm run dev -- --resume
+
+# 3. Verify database state
+sqlite3 data/products.db "SELECT store_id, COUNT(*) FROM price_snapshots GROUP BY store_id"
+# Expected: Both stores have product counts
+```
+
+**Pass Criteria:**
+- [ ] Resume does not re-scrape completed (store, category) pairs
+- [ ] Both stores have price_snapshots in database
+- [ ] Products table has store-agnostic entries (no duplicates)
+- [ ] Final run status is 'completed'
