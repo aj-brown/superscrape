@@ -1,11 +1,15 @@
 import { Camoufox } from 'camoufox';
-import type { Browser, BrowserContext, Cookie, Page, Response } from 'playwright-core';
+import type { Browser, BrowserContext, Cookie, Page, Request } from 'playwright-core';
 import {
   parseProductFromApi,
   extractStoreIdFromCookies,
-  toCategorySlug,
+  buildProductSearchPayload,
+  buildApiHeaders,
+  PRODUCTS_API_URL,
+  CATEGORIES_API_URL,
   type Product,
   type CategoryInfo,
+  type SearchQuery,
 } from './utils';
 import { createReliabilityWrapper, type ReliabilityConfig } from './reliability';
 
@@ -23,18 +27,13 @@ export interface ScraperResult {
   page: number;
 }
 
-interface CapturedResponse {
-  url: string;
-  body: unknown;
-}
-
 export class NewWorldScraper {
   private browserOrContext: Browser | BrowserContext | null = null;
   private cookies: Cookie[] = [];
   private storeId: string | null = null;
   private config: ScraperConfig;
   private page: Page | null = null;
-  private capturedResponses: Map<string, CapturedResponse> = new Map();
+  private authorizationToken: string | null = null;
   private reliability: ReturnType<typeof createReliabilityWrapper>;
 
   constructor(config: ScraperConfig = {}) {
@@ -66,21 +65,21 @@ export class NewWorldScraper {
         ? await (this.browserOrContext as Browser).newPage()
         : await (this.browserOrContext as BrowserContext).newPage();
 
-    // Capture API responses
-    this.page.on('response', async (response: Response) => {
-      const url = response.url();
-      if (url.includes('api-prod.newworld.co.nz')) {
-        try {
-          const body = await response.json();
-          this.capturedResponses.set(url, { url, body });
-        } catch {
-          // Not JSON
+    // Capture Authorization token from outgoing API requests
+    this.page.on('request', (request: Request) => {
+      const url = request.url();
+      if (url.includes('api-prod.newworld.co.nz') && !this.authorizationToken) {
+        const authHeader = request.headers()['authorization'];
+        if (authHeader?.startsWith('Bearer ')) {
+          this.authorizationToken = authHeader;
+          console.log('🔑 Captured authorization token');
         }
       }
     });
 
+    // Navigate to specials page to trigger API request and capture auth token
     console.log('📍 Navigating to New World to establish session...');
-    await this.page.goto('https://www.newworld.co.nz/', {
+    await this.page.goto('https://www.newworld.co.nz/shop/specials?pg=1', {
       waitUntil: 'networkidle',
       timeout: 60000,
     });
@@ -100,45 +99,65 @@ export class NewWorldScraper {
       this.storeId = '60928d93-06fa-4d8f-92a6-8c359e7e846d'; // Default store
     }
 
+    if (!this.authorizationToken) {
+      throw new Error('Failed to capture authorization token during initialization');
+    }
+
     console.log(`✅ Scraper initialized with store ID: ${this.storeId}`);
   }
 
-  // Navigate to a page and intercept the API responses
-  private async navigateAndCapture(url: string): Promise<void> {
-    if (!this.page) {
+  private async fetchProductsFromApi(query: SearchQuery): Promise<{
+    products: Product[];
+    totalHits: number;
+  }> {
+    if (!this.page || !this.authorizationToken || !this.storeId) {
       throw new Error('Scraper not initialized. Call initialize() first.');
     }
 
-    await this.reliability.execute(async () => {
-      this.capturedResponses.clear();
-      await this.page!.goto(url, {
-        waitUntil: 'networkidle',
-        timeout: 60000,
-      });
-      // Note: Removed waitForTimeout as rate limiter handles delays
+    const payload = buildProductSearchPayload(query);
+    const headers = buildApiHeaders(this.cookies, this.authorizationToken);
+
+    const response = await this.page.context().request.post(PRODUCTS_API_URL, {
+      data: payload,
+      headers,
     });
+
+    if (!response.ok()) {
+      throw new Error(`API request failed: ${response.status()} ${response.statusText()}`);
+    }
+
+    const data = (await response.json()) as {
+      products?: Array<Record<string, unknown>>;
+      totalHits?: number;
+    };
+
+    return {
+      products: (data.products || []).map(parseProductFromApi),
+      totalHits: data.totalHits || 0,
+    };
   }
 
   async getCategories(): Promise<CategoryInfo[]> {
-    if (!this.storeId || !this.page) {
+    if (!this.page || !this.authorizationToken) {
       throw new Error('Scraper not initialized. Call initialize() first.');
     }
 
-    // Navigate to a category page to trigger the categories API call
-    console.log('📂 Navigating to category page to fetch categories...');
-    await this.navigateAndCapture(
-      'https://www.newworld.co.nz/shop/category/fruit-and-vegetables?pg=1'
-    );
+    console.log('📂 Fetching categories from API...');
 
-    // Find the categories response
-    for (const [url, response] of this.capturedResponses) {
-      if (url.includes('/categories')) {
-        const data = response.body as { categories?: CategoryInfo[] };
-        return data.categories || [];
-      }
+    const headers = buildApiHeaders(this.cookies, this.authorizationToken);
+
+    const response = await this.reliability.execute(async () => {
+      return this.page!.context().request.get(CATEGORIES_API_URL, { headers });
+    });
+
+    if (!response.ok()) {
+      throw new Error(`Categories API failed: ${response.status()} ${response.statusText()}`);
     }
 
-    return [];
+    const data = (await response.json()) as { categories?: CategoryInfo[] };
+    const categories = data.categories || [];
+    console.log(`📂 Found ${categories.length} top-level categories`);
+    return categories;
   }
 
   async scrapeCategory(
@@ -146,42 +165,33 @@ export class NewWorldScraper {
     category1?: string,
     maxPages: number = 1
   ): Promise<Product[]> {
-    if (!this.page) {
+    if (!this.page || !this.storeId) {
       throw new Error('Scraper not initialized. Call initialize() first.');
     }
 
     const allProducts: Product[] = [];
 
-    for (let page = 0; page < maxPages; page++) {
-      // Build the category URL
-      const categorySlug = category1
-        ? `${toCategorySlug(category0)}/${toCategorySlug(category1)}`
-        : toCategorySlug(category0);
+    for (let pageNum = 0; pageNum < maxPages; pageNum++) {
+      console.log(
+        `🔍 Fetching ${category0}${category1 ? ' > ' + category1 : ''} (page ${pageNum + 1})`
+      );
 
-      const url = `https://www.newworld.co.nz/shop/category/${categorySlug}?pg=${page + 1}`;
-      console.log(`🔍 Navigating to: ${url}`);
+      const result = await this.reliability.execute(async () => {
+        return this.fetchProductsFromApi({
+          storeId: this.storeId!,
+          category0,
+          category1,
+          page: pageNum,
+          hitsPerPage: 50,
+        });
+      });
 
-      await this.navigateAndCapture(url);
+      allProducts.push(...result.products);
+      console.log(`📦 Fetched ${result.products.length} products (page ${pageNum + 1})`);
 
-      // Find the products response
-      for (const [responseUrl, response] of this.capturedResponses) {
-        if (responseUrl.includes('/search/paginated/products')) {
-          const data = response.body as {
-            products?: Array<Record<string, unknown>>;
-            totalHits?: number;
-          };
-
-          const products = (data.products || []).map(parseProductFromApi);
-          allProducts.push(...products);
-
-          console.log(`📦 Fetched ${products.length} products (page ${page + 1})`);
-
-          // Check if we have more pages
-          if (products.length < 50) {
-            return allProducts;
-          }
-          break;
-        }
+      // Check if we have more pages
+      if (result.products.length < 50) {
+        break;
       }
     }
 
@@ -189,38 +199,29 @@ export class NewWorldScraper {
   }
 
   async search(searchTerm: string, maxPages: number = 1): Promise<Product[]> {
-    if (!this.page) {
+    if (!this.page || !this.storeId) {
       throw new Error('Scraper not initialized. Call initialize() first.');
     }
 
     const allProducts: Product[] = [];
 
-    for (let page = 0; page < maxPages; page++) {
-      const url = `https://www.newworld.co.nz/shop/search?q=${encodeURIComponent(searchTerm)}&pg=${page + 1}`;
-      console.log(`🔎 Searching: ${url}`);
+    for (let pageNum = 0; pageNum < maxPages; pageNum++) {
+      console.log(`🔎 Searching "${searchTerm}" (page ${pageNum + 1})`);
 
-      await this.navigateAndCapture(url);
+      const result = await this.reliability.execute(async () => {
+        return this.fetchProductsFromApi({
+          storeId: this.storeId!,
+          searchTerm,
+          page: pageNum,
+          hitsPerPage: 50,
+        });
+      });
 
-      // Find the products response
-      for (const [responseUrl, response] of this.capturedResponses) {
-        if (responseUrl.includes('/search/paginated/products')) {
-          const data = response.body as {
-            products?: Array<Record<string, unknown>>;
-            totalHits?: number;
-          };
+      allProducts.push(...result.products);
+      console.log(`🔎 Found ${result.products.length} products (page ${pageNum + 1})`);
 
-          const products = (data.products || []).map(parseProductFromApi);
-          allProducts.push(...products);
-
-          console.log(
-            `🔎 Search "${searchTerm}" - found ${products.length} products (page ${page + 1})`
-          );
-
-          if (products.length < 50) {
-            return allProducts;
-          }
-          break;
-        }
+      if (result.products.length < 50) {
+        break;
       }
     }
 

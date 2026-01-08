@@ -1,5 +1,10 @@
 import type { Cookie } from 'playwright-core';
 
+export const PRODUCTS_API_URL =
+  'https://api-prod.newworld.co.nz/v1/edge/search/paginated/products';
+export const CATEGORIES_API_URL =
+  'https://api-prod.newworld.co.nz/v1/edge/categories';
+
 export interface NewWorldCookies {
   storeId: string;
   cookies: Cookie[];
@@ -181,4 +186,33 @@ export function getRequiredHeaders(cookies: Cookie[]): Record<string, string> {
   }
 
   return headers;
+}
+
+const REQUIRED_COOKIE_NAMES = [
+  'cf_clearance',
+  'AWSALBTG',
+  'AWSALBTGCORS',
+  '__cf_bm',
+  '_cfuvid',
+];
+
+export function buildApiHeaders(
+  cookies: Cookie[],
+  authorizationToken: string
+): Record<string, string> {
+  const sessionCookies = cookies.filter((c) =>
+    REQUIRED_COOKIE_NAMES.includes(c.name)
+  );
+
+  const cookieString = sessionCookies.map((c) => `${c.name}=${c.value}`).join('; ');
+
+  return {
+    Accept: 'application/json, text/plain, */*',
+    'Accept-Language': 'en-NZ,en;q=0.9',
+    'Content-Type': 'application/json',
+    Authorization: authorizationToken,
+    Origin: 'https://www.newworld.co.nz',
+    Referer: 'https://www.newworld.co.nz/',
+    Cookie: cookieString,
+  };
 }
